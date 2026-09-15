@@ -198,3 +198,8 @@ def test_context_save_load_new(tmp_pcl):
     r = run_pcl(p)
     assert r.output == "A\nB\nC\n"
     assert isinstance(r.module.cx, str)
+
+
+def test_none_expression_emits_null(tmp_pcl):
+    r = run_pcl(tmp_pcl("v=${None}\n"))
+    assert r.output == "v=null\n"

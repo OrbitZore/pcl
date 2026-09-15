@@ -131,3 +131,11 @@ def test_run_inserts_source_dir(tmp_path):
                     cache_dir=str(tmp_path / "cache"))
     assert r.output == "D=7\n"
     assert str(libdir) in sys.path
+
+
+def test_install_importer_idempotent():
+    from pcl.importer import _PclMetaFinder
+    install_importer()
+    install_importer()
+    n = sum(isinstance(f, _PclMetaFinder) for f in sys.meta_path)
+    assert n == 1

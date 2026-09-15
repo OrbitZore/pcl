@@ -191,3 +191,16 @@ def test_syntax_error_c310():
 
 def test_unknown_directive_p200():
     assert err_code("${:frobnicate x}") == "P200"
+
+
+def test_bom_and_l102(tmp_path):
+    from pcl.compiler import compile_file
+    from pcl.errors import PclCompileError
+    p = tmp_path / "bom.pcl"
+    p.write_bytes("﻿ok\n".encode("utf-8"))   # UTF-8 BOM 剥除（§4.1）
+    gen = compile_file(p)
+    assert 'emit("ok\\n")' in gen.source
+    bad = tmp_path / "bad.pcl"
+    bad.write_bytes(b"\xff\xfe\x00")
+    with pytest.raises(PclCompileError, match="L102"):
+        compile_file(bad)
