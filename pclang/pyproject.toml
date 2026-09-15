@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pclang"                     # PyPI 分发名（`pcl` 已被占位包占用）；import 名仍为 pcl
-version = "0.1.0.dev0"
+version = "0.2.0.dev0"
 description = "PCL — Prompt Control Language：编排 LLM/agent 的模板 DSL（模板层是 PCL，脚本层是真 Python）"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -38,6 +38,9 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+pcl = ["settings.schema.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

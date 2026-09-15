@@ -1,6 +1,6 @@
 # PCL 设置文件方案（用户级 / 项目级）
 
-- 状态：**提案（Proposal，未实现）**——候选进入 v0.2（或 v0.1 打磨轮）；已按开源最佳实践评审修订一轮（见文末「评审记录」）
+- 状态：**已实现（v0.2.0.dev0）**——`pcl/settings.py` + CLI 接线 + `pcl config` + `settings.schema.json`；评审修订一轮（见文末「评审记录」）。schemastore.org 提交待发布时进行
 - 范围：设置文件的发现/合并/校验规则、v0.1 配置项清单、潜在配置项全集、明确不配置的项
 - 原则来源：DSL §1/§8（零自研库、无隐藏状态）、DESIGN §1（零第三方依赖）、§5.3（XDG 缓存）、§6/A12（库形态显式参数）、§8.6/§15（开放问题与未来方向）
 
@@ -159,10 +159,11 @@ CLI 侧需区分"显式给出"与"默认"（如 `--agent` 现内置默认 `"pi"`
 - **生成源与缓存**：生成源内容只由模板 + 编译器版本决定——设置**不参与缓存 sha**；设置变化不触发重新编译（合理：设置只影响执行环境参数）。
 - **就绪探测/错误码**：设置不改变任何错误码语义（A500/A502……映射与消息保持）。
 
-## 9. 实现与测试要点（将来落地时）
+## 9. 实现与测试要点（已落地）
 
-- 新增 `pcl/settings.py`：`resolve_settings(entry: Path | None) -> dict`（内置默认 → 浅合并；`pi.args` 拼接；相对路径以设置文件目录为基准展开）+ `apply_to_args(settings, args)`（cli 接线：CLI 显式项跳过）。
-- `cli.py`：`--agent` 等改为 `default=None`，解析后走 fallback 链；`--cache none` 显式优先于 `cache.disable`。
+- `pcl/settings.py`：`resolve_settings(entry, no_project=False) -> Settings`（JSONC 剥离 → 逐层校验 → 合并 + 来源追踪；信任模型与相对路径展开内建）。
+- `cli.py`：`--agent/--timeout/--script/--pi-bin/--connector-path` 等改为 `default=None` 走 fallback 链；`--cache none` > `cache.disable`、`--cache DIR` > `cache.dir`；`--pi-arg` 追加在设置 `pi.args` 之后；`--no-project-config`；新增 `pcl config [file] [--defaults]`；`python -m pcl` 等价 CLI（A12 补齐）。
+- `cache.keep_per_stem` 经 `ensure_compiled(keep_per_stem=…)` 接入 GC。
 - 验收清单：
   1. 优先级链（CLI > 项目 > 用户 > 内置）逐键断言；
   2. 项目级向上查找取最近、不合并多层；

@@ -110,8 +110,12 @@ def _stem(path: Path) -> str:
 
 
 def ensure_compiled(pcl_path: Path, *, cache_dir: str | None = None,
-                    no_cache: bool = False) -> CompiledFile | CompiledCode:
-    """确保生成源就绪：缓存命中 → CompiledFile；--cache none → CompiledCode。"""
+                    no_cache: bool = False,
+                    keep_per_stem: int = 2) -> CompiledFile | CompiledCode:
+    """确保生成源就绪：缓存命中 → CompiledFile；--cache none → CompiledCode。
+
+    ``keep_per_stem``：同 stem 保留的缓存条目数（设置 cache.keep_per_stem，§5.3）。
+    """
     pcl_path = Path(pcl_path)
     if no_cache:
         gen = compile_file(pcl_path)
@@ -126,7 +130,8 @@ def ensure_compiled(pcl_path: Path, *, cache_dir: str | None = None,
     if not cache_py.exists():
         gen = compile_file(pcl_path)
         _atomic_write(cache_py, gen.source)
-        _gc_stale(root, _stem(pcl_path), keep=cache_py)
+        _gc_stale(root, _stem(pcl_path), keep=cache_py,
+                  keep_per_stem=keep_per_stem)
         return CompiledFile(cache_py, pcl_path, gen)
     return CompiledFile(cache_py, pcl_path)
 
@@ -145,8 +150,8 @@ def _atomic_write(path: Path, text: str):
         raise
 
 
-def _gc_stale(root: Path, stem: str, *, keep: Path):
-    """同 stem 仅保留最近 2 个条目（含新写的 keep），更旧的随写随删。"""
+def _gc_stale(root: Path, stem: str, *, keep: Path, keep_per_stem: int = 2):
+    """同 stem 仅保留最近 keep_per_stem 个条目（含新写的 keep），更旧的随写随删。"""
     import importlib.util
 
     try:
@@ -155,7 +160,7 @@ def _gc_stale(root: Path, stem: str, *, keep: Path):
             key=lambda p: p.stat().st_mtime, reverse=True)
     except OSError:
         return
-    for old in entries[1:]:  # 除最新 1 个旧条目外全部删除（含 keep 共保留 2 个）
+    for old in entries[max(0, keep_per_stem - 1):]:  # 新条目 + keep_per_stem-1 个旧条目
         try:
             old.unlink()
         except OSError:

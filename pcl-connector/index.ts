@@ -648,6 +648,7 @@ function usage(ctx: ExtensionCommandContext): void {
     "PCL 用法：",
     "  /pcl run <file.pcl> [PROMPT…] [选项]   在当前会话执行 PCL",
     "  /pcl gen|check <file.pcl>              生成源 / 编译检查",
+    "  /pcl config [file]                     打印生效设置及来源",
     "  /pcl version                           版本",
     "  选项透传 pcl CLI（--var/--timeout/--trace/--cache/-o 等）；",
     "  正向专属选项（--agent/--pi-bin/--connector-path/--pi-arg/--script）被拒。",
@@ -662,7 +663,7 @@ export default function (pi: ExtensionAPI): void {
   pi.registerCommand("pcl", {
     description: "PCL：/pcl run <file.pcl> [PROMPT] — 在当前会话执行 PCL（与 pcl CLI 对齐）",
     getArgumentCompletions: (prefix: string) => {
-      const subs = ["run", "gen", "check", "version"]
+      const subs = ["run", "gen", "check", "config", "version"]
         .map((s) => ({ value: s, label: s }))
         .filter((i) => i.value.startsWith(prefix));
       return subs.length ? subs : null;
@@ -678,7 +679,7 @@ export default function (pi: ExtensionAPI): void {
       if (sub === "run") {
         return runEmbedded(ctx, trimmed.split(/\s+/).slice(1));
       }
-      if (sub === "gen" || sub === "check" || sub === "version") {
+      if (sub === "gen" || sub === "check" || sub === "config" || sub === "version") {
         return passthrough(ctx, trimmed.split(/\s+/));
       }
       return usage(ctx);

@@ -1,7 +1,15 @@
-"""cli — pcl 命令行入口（DESIGN §10，DSL §11）。
+"""cli — pcl 命令行入口（DESIGN §10，DSL §11；设置文件见 docs/SETTINGS.md）。
 
-``pcl run / gen / check / version``；退出码：0 成功；1 编译期（L/P/C）与用法错
-（argparse 默认 2 一律覆写为 1）；2 运行期（R）；3 桥接（A）；130 SIGINT（R409）。
+``pcl run / gen / check / config / version``；退出码：0 成功；1 编译期（L/P/C）
+与用法错（argparse 默认 2 覆写为 1）及**设置错误**；2 运行期（R）；3 桥接（A）；
+130 SIGINT（R409）。
+
+设置解析（CLI 层专用，库形态不受影响）：
+- 显式 CLI 参数 > 项目级 > 用户级 > 内置默认（argparse 各旗标 ``default=None``
+  以区分“显式给出”，事后走 fallback 链）；
+- ``--pi-arg`` 项追加在设置 ``pi.args`` 之后；
+- ``--cache none`` > 设置 ``cache.disable``；``--cache DIR`` > 设置 ``cache.dir``；
+- ``--no-project-config`` / ``PCL_NO_PROJECT_CONFIG=1`` 跳过项目级发现。
 """
 
 from __future__ import annotations
@@ -32,6 +40,11 @@ def build_parser() -> _Parser:
                    version=f"pcl {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True, metavar="命令")
 
+    def add_cache_opts(sp):
+        sp.add_argument("--cache", dest="cache", default=None, metavar="DIR|none")
+        sp.add_argument("--no-project-config", action="store_true",
+                        help="跳过项目级设置发现（密封运行，SETTINGS §5-F）")
+
     run = sub.add_parser("run", help="编译并执行模板（加载 + main(prompt)）")
     run.add_argument("file", help="模板 .pcl 文件")
     run.add_argument("prompt", nargs="*", help="prompt 位置参数（以空格连接）")
@@ -39,35 +52,50 @@ def build_parser() -> _Parser:
                      help="prompt 同义选项（与位置参数冲突时以位置参数为准）")
     run.add_argument("--var", action="append", default=[], metavar="NAME=VALUE",
                      help="注入模块全局（可多次；VALUE 先 literal_eval 失败按原串）")
-    run.add_argument("--agent", default="pi", choices=["pi", "null", "script", "embed"])
+    run.add_argument("--agent", default=None, choices=["pi", "null", "script", "embed"],
+                     help="默认取自设置（缺省 pi）")
     run.add_argument("--script", metavar="PATH", help="script 桥回放文件（JSONL）")
     run.add_argument("--pi-bin", metavar="PATH")
-    run.add_argument("--connector-path", metavar="PATH|none", default="none")
+    run.add_argument("--connector-path", metavar="PATH|none")
     run.add_argument("--pi-arg", action="append", default=[], metavar="ARG")
-    run.add_argument("--timeout", type=float, default=300.0, metavar="SEC")
+    run.add_argument("--timeout", type=float, default=None, metavar="SEC")
     run.add_argument("-o", "--output", dest="output", metavar="FILE",
                      help="只写文件，不再打 stdout")
     run.add_argument("--trace", action="store_true")
-    run.add_argument("--cache", dest="cache", default=None, metavar="DIR|none")
+    add_cache_opts(run)
 
     gen = sub.add_parser("gen", help="打印生成的 Python 源")
     gen.add_argument("file")
-    gen.add_argument("--cache", dest="cache", default=None, metavar="DIR|none")
+    add_cache_opts(gen)
 
     chk = sub.add_parser("check", help="模板编译 + 生成源 compile() 检查（不执行）")
     chk.add_argument("file")
-    chk.add_argument("--cache", dest="cache", default=None, metavar="DIR|none")
+    add_cache_opts(chk)
+
+    cfg = sub.add_parser("config",
+                         help="打印生效设置及各键来源（文件层 + 内置默认；"
+                              "CLI 显式参数不在此列）")
+    cfg.add_argument("file", nargs="?",
+                     help="可选 .pcl 入口（用于项目级设置发现）")
+    cfg.add_argument("--no-project-config", action="store_true")
+    cfg.add_argument("--defaults", action="store_true", help="仅打印内置默认")
 
     sub.add_parser("version", help="版本")
     return p
 
 
-def _cache_kwargs(cache: str | None) -> dict:
-    if cache is None:
-        return {}
-    if cache == "none":
+# ---- 设置回退链（CLI 显式 > 项目级 > 用户级 > 内置） ---------------------------
+
+def _cache_kwargs(args_cache, settings):
+    if args_cache == "none":
         return {"no_cache": True}
-    return {"cache_dir": cache}
+    if args_cache:
+        return {"cache_dir": args_cache}
+    if settings.cache_disable:
+        return {"no_cache": True}
+    if settings.cache_dir:
+        return {"cache_dir": settings.cache_dir}
+    return {}
 
 
 def _parse_var(specs: list[str]) -> dict:
@@ -88,30 +116,87 @@ def _parse_var(specs: list[str]) -> dict:
     return out
 
 
-def main(argv: list[str] | None = None) -> int:
-    from .errors import PclCompileError, PclError, exit_code_for
+def _format_config(settings, defaults_only: bool) -> str:
+    from .settings import BUILTIN
 
+    lines = []
+    if defaults_only:
+        lines.append("# 内置默认（--defaults）")
+        flat = {"agent": BUILTIN["agent"], "timeout": BUILTIN["timeout"],
+                "trace": BUILTIN["trace"], "strict": BUILTIN["strict"],
+                "cache.dir": BUILTIN["cache"]["dir"],
+                "cache.disable": BUILTIN["cache"]["disable"],
+                "cache.keep_per_stem": BUILTIN["cache"]["keep_per_stem"],
+                "pi.bin": BUILTIN["pi"]["bin"],
+                "pi.connector_path": BUILTIN["pi"]["connector_path"],
+                "pi.args": BUILTIN["pi"]["args"],
+                "script.path": BUILTIN["script"]["path"]}
+        for k, v in flat.items():
+            lines.append(f"{k} = {json_dumps(v)}  # builtin")
+        return "\n".join(lines) + "\n"
+
+    lines.append("# 有效配置（文件层与内置默认；CLI 显式参数不在此列）")
+    for k, v in settings.flat().items():
+        origin = settings.origins.get(k, "builtin")
+        lines.append(f"{k} = {json_dumps(v)}  # {origin}")
+    for s in settings.sources:
+        lines.append(f"# 来源：{s}")
+    if not settings.sources:
+        lines.append("# 来源：无设置文件（全部为内置默认）")
+    return "\n".join(lines) + "\n"
+
+
+def json_dumps(v) -> str:
+    import json
+
+    return json.dumps(v, ensure_ascii=False)
+
+
+def main(argv: list[str] | None = None) -> int:
     try:
         args = build_parser().parse_args(argv)
     except SystemExit as e:   # 用法错（argparse 2 → 1，§10）
         return int(e.code or 0) if e.code else 1
+
+    from .errors import PclCompileError, PclError, exit_code_for
+    from .settings import SettingsError, resolve_settings
 
     try:
         if args.cmd == "version":
             print(f"pcl {__version__}")
             return 0
 
+        if args.cmd == "config":
+            try:
+                st = resolve_settings(args.file,
+                                      no_project=args.no_project_config)
+            except SettingsError as e:
+                sys.stderr.write(f"pcl: 设置错误：{e.format()}\n")
+                return 1
+            sys.stdout.write(_format_config(st, args.defaults))
+            return 0
+
+        # run / gen / check：入口 .pcl 为设置发现基准（SETTINGS §2）
+        try:
+            settings = resolve_settings(args.file,
+                                        no_project=args.no_project_config)
+        except SettingsError as e:
+            sys.stderr.write(f"pcl: 设置错误：{e.format()}\n")
+            return 1
+
         if args.cmd == "gen":
             from .compiler import compile_program
 
-            src = compile_program(args.file, **_cache_kwargs(args.cache))
+            src = compile_program(args.file,
+                                  **_cache_kwargs(args.cache, settings))
             sys.stdout.write(src)
             return 0
 
         if args.cmd == "check":
             from .compiler import compile_program
 
-            src = compile_program(args.file, **_cache_kwargs(args.cache))
+            src = compile_program(args.file,
+                                  **_cache_kwargs(args.cache, settings))
             n = len(src.splitlines())
             print(f"OK: {args.file} 编译通过（生成 {n} 行 Python）")
             return 0
@@ -119,7 +204,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.cmd == "run":
             from .runtime import run_program
 
-            if args.agent == "embed":
+            agent = args.agent or settings.agent
+            if agent == "embed":
                 if not args.output:
                     sys.stderr.write(
                         "pcl: 错误：--agent embed 强制 -o（嵌入形态 stdout 让给协议，§8.5；"
@@ -139,16 +225,18 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 result = run_program(
                     args.file, prompt,
-                    agent=args.agent,
-                    script=args.script,
+                    agent=agent,
+                    script=args.script or settings.script_path,
                     var_overrides=var_overrides,
-                    pi_bin=args.pi_bin,
-                    connector_path=args.connector_path,
-                    pi_args=args.pi_arg,
-                    timeout=args.timeout,
-                    trace=args.trace,
+                    pi_bin=args.pi_bin or settings.pi_bin,
+                    connector_path=(args.connector_path
+                                    or settings.pi_connector_path),
+                    pi_args=settings.pi_args + list(args.pi_arg),
+                    timeout=(args.timeout if args.timeout is not None
+                             else settings.timeout),
+                    trace=args.trace or settings.trace,
                     out=out,
-                    **_cache_kwargs(args.cache),
+                    **_cache_kwargs(args.cache, settings),
                 )
                 if out is None:
                     _stdout_write(result.output)
@@ -161,6 +249,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except PclCompileError as e:
         sys.stderr.write(e.format() + "\n")
+        return 1
+    except SettingsError as e:
+        sys.stderr.write(f"pcl: 设置错误：{e.format()}\n")
         return 1
     except PclError as e:
         sys.stderr.write(e.format() + "\n")

@@ -2,6 +2,16 @@
 
 编排 LLM/agent 的模板 DSL：**模板层是 PCL，脚本层是真 Python**。纯 Python 包（≥3.10，零第三方依赖），把 `.pcl` 编译成可读的 Python 源码并在同一解释器中执行，完整复用 Python 生态（含 C 扩展）。首个适配的外部 agent 为 [pi](https://github.com/earendil-works/pi-coding-agent)：拉起 `pi --mode rpc`，经 stdio JSONL 驱动 pcl-connector 扩展完成 pass 交互与上下文管理；反向亦通——连接器在 pi 内注册与 CLI 对齐的 `/pcl` 命令族，`/pcl run f.pcl P` 在当前会话中直接执行（DESIGN.md §8.5/§9.1）。
 
+## 设置（用户级 / 项目级）
+
+```bash
+pcl config                       # 打印生效设置及各键来源（--defaults 看内置默认）
+~/.config/pcl/settings.json      # 用户级（$XDG_CONFIG_HOME；JSONC：允许注释）
+<proj>/.pcl/settings.json        # 项目级（自入口 .pcl 向上最近者；执行面键仅用户级）
+```
+
+默认值可配置：`agent`/`timeout`/`trace`/`cache.{dir,disable,keep_per_stem}`/`pi.{bin,connector_path,args}`/`script.path`；优先级 CLI > 项目级 > 用户级 > 内置。方案全文见 [docs/SETTINGS.md](docs/SETTINGS.md)。
+
 ## 构建与安装
 
 ```bash

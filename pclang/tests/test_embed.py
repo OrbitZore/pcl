@@ -105,3 +105,39 @@ def test_embed_runtime_error_exit_2(tmp_path):
     code, stderr, _, _ = run_embed(tmp_path, {"file": str(tpl), "passes": []})
     assert code == 2
     assert "R400" in stderr
+
+
+@pytest.mark.skipif(not Path(PCL_BIN).exists(), reason="未找到 pcl 可执行")
+def test_embed_picks_up_project_settings(tmp_path, monkeypatch):
+    """嵌入子进程按模板路径发现项目级设置（SETTINGS §2/验收 9）。
+
+    项目级 {"trace": true} → embed 桥经 tracer 把 message_update 增量
+    写到 stderr（协议独占 stdout 不受影响）。
+    """
+    import os
+
+    proj = tmp_path / "proj"
+    (proj / ".pcl").mkdir(parents=True)
+    (proj / ".pcl" / "settings.json").write_text('{"trace": true}', encoding="utf-8")
+    tpl = proj / "t.pcl"
+    tpl.write_text("${:pass}\nOK\n", encoding="utf-8")   # EOF 终止的 pass
+
+    out = tmp_path / "out.txt"
+    cfg_path = tmp_path / "cfg.json"
+    # embed_host 直驱 pcl 子进程：经 extra_event 发送 message_update
+    cfg_path.write_text(json.dumps({
+        "file": str(tpl), "passes": [{}],
+        "extra_event": {"type": "message_update",
+                        "assistantMessageEvent": {"type": "text_delta",
+                                                  "delta": "TRACE-DELTA"}},
+    }), encoding="utf-8")
+
+    host = TESTS / "embed_host.py"
+    proc = subprocess.run(
+        [sys.executable, str(host), PCL_BIN, str(out), str(cfg_path)],
+        capture_output=True, text=True, timeout=120, cwd=str(TESTS.parent),
+        env={**os.environ, "XDG_CONFIG_HOME": str(tmp_path / "no-user-cfg"),
+             "PCL_CONFIG_FILE": "", "PCL_NO_PROJECT_CONFIG": ""})
+    assert "EXIT: 0" in proc.stdout
+    assert out.read_text(encoding="utf-8") == "ok\n"   # null 回放 reply + 折叠
+    assert "TRACE-DELTA" in proc.stdout    # trace 增量落 stderr（host 汇报）

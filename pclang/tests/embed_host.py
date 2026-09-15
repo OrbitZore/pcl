@@ -91,6 +91,8 @@ while True:
             send({"type": "tool_execution_start", "toolCallId": "c1",
                   "toolName": "pcl_write", "args": {"values": {k: v}}})
         last_reply = ps.get("reply", "ok")
+        if cfg.get("extra_event"):
+            send(cfg["extra_event"])
         if not ps.get("never_settle"):
             send({"type": "agent_settled"})
         resp(cid, "prompt")

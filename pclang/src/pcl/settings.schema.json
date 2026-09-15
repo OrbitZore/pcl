@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/earendil-works/pcl/main/pclang/src/pcl/settings.schema.json",
+  "title": "pcl settings",
+  "description": "PCL 设置文件（用户级 / 项目级）。格式为 JSONC 子集（允许 // 与 /* */ 注释、尾随逗号）。注意：pi.* 与 script.path 仅允许出现在用户级文件——项目级出现会被拒绝（信任模型，docs/SETTINGS.md §3.5）。",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "本 schema 的引用地址"
+    },
+    "$comment": {
+      "type": "string",
+      "description": "注释（忽略）"
+    },
+    "agent": {
+      "type": "string",
+      "enum": [
+        "pi",
+        "null",
+        "script",
+        "embed"
+      ],
+      "default": "pi",
+      "description": "默认 agent（--agent 的默认值）"
+    },
+    "timeout": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "default": 300,
+      "description": "pass 等待 agent 空闲的按次超时（秒）"
+    },
+    "trace": {
+      "type": "boolean",
+      "default": false,
+      "description": "默认开启 --trace（message_update 增量 → stderr）"
+    },
+    "strict": {
+      "type": "boolean",
+      "default": false,
+      "description": "仅用户级：把未知键升级为报错（防拼写静默失效）"
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "dir": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "生成源缓存目录；null = $XDG_CACHE_HOME/pcl。相对路径以设置文件所在目录为基准；项目级须为相对且不逃逸项目目录"
+        },
+        "disable": {
+          "type": "boolean",
+          "default": false,
+          "description": "true 等价 --cache none（不落盘、无 .pyc）"
+        },
+        "keep_per_stem": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "default": 2,
+          "description": "同 stem 保留的缓存条目数（GC）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "pi": {
+      "type": "object",
+      "description": "pi 桥接（仅用户级）",
+      "properties": {
+        "bin": {
+          "type": "string",
+          "default": "pi",
+          "description": "pi 可执行；含路径分隔符的相对路径以设置文件目录为基准"
+        },
+        "connector_path": {
+          "type": "string",
+          "default": "none",
+          "description": "\"none\" = 用预装扩展；或直指 pcl-connector/index.ts"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "透传 pi 命令行（用户级文件 + CLI --pi-arg 依序追加）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "script": {
+      "type": "object",
+      "description": "script 桥（仅用户级）",
+      "properties": {
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "script 桥默认回放文件；null = 必须显式 --script"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
