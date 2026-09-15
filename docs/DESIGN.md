@@ -542,3 +542,14 @@ M2 前原定协议 spike 已**按 rpc.md 与 pi 源码落定**（§8.1–8.3）�
 ## 15. 未来方向（备忘）
 
 并行/多 agent、其他 agent 工具适配子包、REPL、生成源 `.pyc` 之外的增量缓存、读写值体积上限（`pcl_write` 写回 / `:read` 快照，v0.1 不设）、`text()` 输出侧递归深度上限（写入方向 JSON→Python 已限 32；病态深结构暂靠 RecursionError → R400 兜底）。
+
+---
+
+## 16. M2 冒烟复核记录（2026-09，pi@0.85.1 实测）
+
+实现期以真 pi 复核 §8 预设，两处与冻结稿预期不符，按实测修正实现（协议面不变）：
+
+1. **§8.2 pass 响应时序**：冻结稿预期「`/pcl pass` 经 `sendUserMessage` await 完整轮次 → response ok 严格晚于 `agent_settled`」。实测：扩展 API 的 `pi.sendUserMessage` 为**发后即忘**（agent-session 源码内联 `.catch(...)`、不返回 promise），外层 `prompt` 的 response ok 在**预检通过时即发出、早于 `agent_settled`**。修正：`agent_settled` 是唯一 pass 边界（本就如此设计），response 仅作屏障——状态机对两种次序均容忍；response `success:false`（无模型/鉴权失败等预检错误）仍即时失败化为 A501。`tool_execution_start` 先于 `tool_call` 阻断钩子发射（agent 循环源码确认），阻断无法抑制该事件——写值回流与 R406 兜底维持 §8.1 机制不变。
+2. **§9.2 pcl_write 参数 schema**：冻结稿建议 `Type.Record(Type.String(), Type.Unknown())` 直接作 parameters。实测：pi 的工具参数校验层会把**顶层开放形状**（Record / `additionalProperties`）剥空（`tool_execution_start` 事件层 args 即为 `{}`）；命名键承载完好。修正：pcl_write 经命名键 `values` 嵌套（`Type.Object({values: Type.Record(...)})`，严格 schema 下外层恒为包装、桥侧解包无歧义），execute 同时兼容平铺形态兜底。工具参数形态属连接器内部 UX、不在冻结协议面（`/pcl pass` 信令三键不变）。
+
+其余复核项与冻结稿一致：`get_commands` 去重探测（重复注册 → `/pcl:1`、`/pcl:2`）、`sessionFile` token、`set_session_name` 后重取、惰性落盘（R20）与 `:load` 预检 R430、`switch_session` 失败/取消语义、无 sessionFile 时 `:save` → A501。

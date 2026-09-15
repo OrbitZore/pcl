@@ -136,15 +136,26 @@ class ScriptBridge(IAgentBridge):
         self._mint()
 
 
-def make_bridge(agent: str, *, script: str | Path | None = None, **kw) -> IAgentBridge:
-    """按 --agent 构造桥。pi / embed 属 M2/M3 交付。"""
+def make_bridge(agent: str, *, script: str | Path | None = None,
+                pi_bin: str | None = None, connector_path: str | None = None,
+                pi_args: list | None = None, timeout: float | None = None,
+                trace=None, **_kw) -> IAgentBridge:
+    """按 --agent 构造桥。embed（嵌入模式）属 M3 交付。"""
     if agent == "null":
         return NullBridge()
     if agent == "script":
         if not script:
             raise PclError("A500", "--agent script 需要 --script PATH")
         return ScriptBridge(script)
-    if agent in ("pi", "embed"):
+    if agent == "pi":
+        from .pibridge import PiBridge
+        tracer = None
+        if trace:
+            import sys
+            tracer = lambda d: sys.stderr.write(d)  # noqa: E731
+        return PiBridge(pi_bin=pi_bin or "pi", connector_path=connector_path,
+                        pi_args=pi_args, timeout=timeout or 300.0, trace=tracer)
+    if agent == "embed":
         raise NotImplementedError(
-            f"--agent {agent} 的桥接层（PiBridge）属 M2/M3 里程碑，尚未交付")
+            "嵌入模式（--agent embed，由 pi 内 /pcl run 拉起）属 M3 里程碑，尚未交付")
     raise NotImplementedError(f"未知 agent：{agent!r}")

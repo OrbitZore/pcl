@@ -28,6 +28,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+  "smoke_pi: 需要真 pi 二进制的集成冒烟（pass 类另需已配置模型）",
+]
 
 [tool.ruff]
 line-length = 100

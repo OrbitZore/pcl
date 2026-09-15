@@ -142,7 +142,11 @@ class Run:
         self._token = None
 
     def __enter__(self) -> Run:
-        self.bridge.start()
+        try:
+            self.bridge.start()
+        except BaseException:
+            self.bridge.close()   # start 失败不进 __exit__，主动清理子进程资源
+            raise
         self._token = _current_run.set(self)
         return self
 

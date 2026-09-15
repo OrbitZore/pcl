@@ -120,12 +120,13 @@ def test_run_bridge_error_exit_3(capsys, tmp_path, tmp_pcl):
     assert "[A510]" in err
 
 
-def test_run_pi_agent_not_implemented(capsys, tmp_path, tmp_pcl):
-    p = tmp_pcl("x\n")
-    code, out, err = run_cli(["run", str(p), "--agent", "pi",
-                              "--cache", str(tmp_path / "c")], capsys)
-    assert code == 1
-    assert "M2" in err
+def test_run_pi_agent_startup_failure_a5xx(capsys, tmp_path, tmp_pcl):
+    # pi 桥已实现（M2）：pi 启动即退 → A 类失败（退出码 3）
+    p = tmp_pcl("${:pass}\nx\n")
+    code, out, err = run_cli(["run", str(p), "--agent", "pi", "--pi-bin",
+                              "/bin/false", "--cache", str(tmp_path / "c")], capsys)
+    assert code == 3
+    assert "[A50" in err
 
 
 def test_run_var_reserved_exit_1(capsys, tmp_path, tmp_pcl):

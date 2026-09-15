@@ -7,13 +7,19 @@
 ```bash
 cd pclang
 uv venv && uv pip install -e . pytest ruff   # Python ≥3.10，零运行时依赖
-.venv/bin/python -m pytest                 # 111 项测试
+.venv/bin/python -m pytest                 # 139 项测试（含 pibridge 伪对端）
+.venv/bin/python -m pytest -m smoke_pi     # 真 pi 集成冒烟（pass 类需已配置模型）
 .venv/bin/pcl run tests/data/demo.pcl "主题" --agent null   # 纯模板调试（reply=prompt）
 .venv/bin/pcl run tests/data/rewrite.pcl P --agent script --script tests/data/rewrite.script.jsonl
 .venv/bin/pcl gen tests/data/demo.pcl      # 查看生成源（含 # pcl:行号）
+
+# 真 agent（需 pi + 已配置模型；连接器经 --connector-path 直指源文件，或预装到
+# ~/.pi/agent/extensions/ 后省略该参数）
+.venv/bin/pcl run tests/data/rewrite.pcl "为什么天空是蓝色的" \
+    --agent pi --connector-path ../pcl-connector/index.ts
 ```
 
-里程碑：M0 ✅（编译器+gen/check+黄金快照）、M1 ✅（runtime+Null/Script 桥+e2e+importer）、M2 ⏳（PiBridge+connector）、M3/M4 ⏳（嵌入模式与接续）。
+里程碑：M0 ✅（编译器+gen/check+黄金快照）、M1 ✅（runtime+Null/Script 桥+e2e+importer）、M2 ✅（PiBridge+pcl-connector+上下文三指令+冒烟；M2 冒烟复核见 DESIGN §16）、M3 ⏳（嵌入模式 /pcl run）、M4 ⏳（嵌入上下文接续）。
 
 ## 文档
 
@@ -42,4 +48,4 @@ uvx pclang run demo.pcl "猫为什么会打呼噜"  # 或 pipx install pclang（
 
 v0.1 要点：表达式/语句/库全部是 Python——插值双形式 `${}`/`$()`（内容同为任意 Python 简单语句：表达式值插入输出、赋值/`import` 等静默执行，丢弃返回值用 `_ =` 前缀；无 `:py`/`:set`/`:call` 之分）：`${}` 发起型（冲刷保序、表达式独立 emit、行号 1:1）、`$()` 合并型（立即求值、织入所在段落单条 emit）；控制流一律 `:if…:fi` / `:for|:while…:done` 指令对，零 `:` 块语法；缩进无语义（编译剥除行首/行尾空白，源码可自由缩进排版）；裸糖 `$prompt`（文本位置 ≡ `$(prompt)`）= argv 输入 / 函数输入（`${:function NAME(参数列表)}` 复用 Python 形参语法，缺省 `(prompt="")`）；`${:pass :read/:write 名字}` 开启一轮 agent 交互（read/write 各一个名字；prompt 独立 sink 隔离，体为纯输出构造，遇下一指令或 EOF 自动提交），回复进输出文档并存入 `reply`；`${r"""…"""}` 原始三引号字符串（可跨行）输出含 `${` 的大段文本不转义；上下文三指令 `:save`/`:load`/`:new`（`:save cx` 把当前会话的 token 存入变量 `cx`，`:load cx` 取值切换；无映射文件，跨运行把 token 存进自己的文件即可），pass 默认追加当前上下文，压缩信任 agent 自带机制。`.pcl` 即 Python 模块：双向 import 兼容（`import pcl; pcl.install_importer()` 后 `import mytpl as t`；DSL 内 `${import helpers as h}`），import 只执行加载层（定义），永不触发 agent。
 
-状态：v0.1 设计已终审（DSL/DESIGN 冻结，含全部终审轮次修订与终审后补丁：插值双形式 `${}`/`$()`、裸糖 `$prompt`、转义 `$$`、`:read` 快照预序列化冻结、生成侧 `\r` 转义保真等），文档正式冻结。**实现进行中**：M0（tlex/tparse/pygen + `pcl gen/check` + 黄金快照）与 M1（runtime + Null/Script 桥 + e2e-script + importer 模块化）已完成（111 项 pytest 全绿）；M2（PiBridge + pcl-connector）待实现——`--agent pi` 暂以明确报错拒绝。
+状态：v0.1 设计已终审（DSL/DESIGN 冻结，含全部终审轮次修订与终审后补丁：插值双形式 `${}`/`$()`、裸糖 `$prompt`、转义 `$$`、`:read` 快照预序列化冻结、生成侧 `\r` 转义保真等），文档正式冻结。**实现进行中**：M0（tlex/tparse/pygen + `pcl gen/check` + 黄金快照）、M1（runtime + Null/Script 桥 + e2e-script + importer 模块化）与 M2（PiBridge + pcl-connector + 上下文三指令 + 真 agent 冒烟，含 DSL §12 示例对真 LLM 全链路跑通）已完成；M3（嵌入模式 `/pcl run`）与 M4（嵌入上下文接续）待实现。M2 冒烟复核记录见 DESIGN §16。
