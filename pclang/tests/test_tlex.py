@@ -197,7 +197,7 @@ def test_bom_and_l102(tmp_path):
     from pcl.compiler import compile_file
     from pcl.errors import PclCompileError
     p = tmp_path / "bom.pcl"
-    p.write_bytes("﻿ok\n".encode("utf-8"))   # UTF-8 BOM 剥除（§4.1）
+    p.write_bytes("﻿ok\n".encode())   # UTF-8 BOM 剥除（§4.1）
     gen = compile_file(p)
     assert 'emit("ok\\n")' in gen.source
     bad = tmp_path / "bad.pcl"
