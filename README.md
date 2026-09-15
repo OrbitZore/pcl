@@ -42,7 +42,8 @@ uv venv && uv pip install -e . pytest ruff   # Python ≥3.10，零运行时依�
 ## 文档
 
 - [docs/DSL.md](docs/DSL.md) — 语言规范 v0.1（已终审）
-- [docs/DESIGN.md](docs/DESIGN.md) — 实现设计 v0.1（已终审）
+- [docs/DESIGN.md](docs/DESIGN.md) — 实现设计 v0.1（已终审；实现期实测修正见 §16）
+- [docs/SETTINGS.md](docs/SETTINGS.md) — 设置文件方案（用户级/项目级；提案）
 
 ## 一分钟看懂
 
