@@ -1,0 +1,28 @@
+${from math import floor}
+
+${SCORE = 0}
+${HISTORY = []}
+
+${:function attempt}
+    ${:pass :write SCORE}
+        请就以下主题写一段话（第 $(len(HISTORY) + 1) 次尝试），完成后调用 pcl_write 把自评质量分（0..10 整数）写入 SCORE：
+        $prompt
+    ${:return SCORE}
+${:endfunction}
+
+${:save cx}
+${:while SCORE < 7 and len(HISTORY) < 5}
+    ${SCORE = attempt(prompt)}
+    ${_ = HISTORY.append(SCORE)}
+${:done}
+
+历史得分：
+${:for s in HISTORY}
+    - $(s)
+${:done}
+平均（去尾）：$(floor(sum(HISTORY) / len(HISTORY)))
+
+${:# 换一个干净上下文做摘要}
+${:new}
+${:pass :read HISTORY}
+    请把当前得分历史总结成一句话；数据请调用 pcl_read 读取 HISTORY。
