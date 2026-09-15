@@ -559,3 +559,9 @@ M2 前原定协议 spike 已**按 rpc.md 与 pi 源码落定**（§8.1–8.3）�
 3. **嵌入读线程与解释器关闭**：嵌入传输的读线程若阻塞在 `sys.stdin.buffer`（BufferedReader），解释器关闭时会因缓冲锁冲突致命中止（实测 SIGABRT、宿主侧退出码 null）。修正：读线程经 `select` + `os.read` 直读 fd、不触碰缓冲包装（daemon 线程随进程退出，无锁冲突）。
 4. **§8.5 提交期失败可见性（嵌入）**：正向形态的 `<runtime>`/`send_user_message` extension_error 经 RPC 流出（M2 已接）；嵌入形态无 RPC 客户端且扩展不可订阅该事件——连接器以 **agent_start 存活检测**兜底（提交后 15s 未观测到 agent 启动即合成 `command:pcl` 错误事件 → pcl A501）。
 5. **`/pcl run` 选项切分**：与 argparse 对齐取「首个 `-` 开头 token 起为选项尾」（规范文本写作「`--` 开头」，按 CLI 实义执行——`-o` 亦为选项）；字面 `--` 其后 token 并入 PROMPT。
+
+**M4 冒烟复核追加（同日，接续）**：
+
+6. **§8.6 依赖复核（R17）**：`session_shutdown` 事件携带 `reason`（quit/reload/new/resume/fork）与 `targetSessionFile`；`SessionManager.open(path).getCwd()` 在 pi@0.85.1 可用（跨 cwd 预检按此实现）。
+7. **RPC 命令串行**：经 RPC `prompt` 注入的命令在上一命令（含 `/pcl run` 的处理器 await）完成后才执行——无法经 RPC 模拟「用户中途切会话」；auto-follow 场景以 pty 驱动真 TUI 验证（`/new` 中途 → 接续提示 + 后续 `:new` → A523，实测通过）。
+8. **reload 实测良性偏差**：实测 `/reload` 中途发生时旧模块闭包（子进程流监听 + serve 循环 + latestPi）继续服务，run 存活完成（未按 §8.6 预期走孤儿路径）。`broken` 标记与孤儿兜底保留（`ensureBinding` 逐命令回 embed-orphaned、时限后关 stdin）；reload 未触发 handler 的机理（模块缓存行为）列为后续观察项。

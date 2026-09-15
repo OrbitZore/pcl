@@ -19,7 +19,7 @@ uv venv && uv pip install -e . pytest ruff   # Python ≥3.10，零运行时依�
     --agent pi --connector-path ../pcl-connector/index.ts
 ```
 
-里程碑：M0 ✅（编译器+gen/check+黄金快照）、M1 ✅（runtime+Null/Script 桥+e2e+importer）、M2 ✅（PiBridge+pcl-connector+上下文三指令+冒烟）、M3 ✅（嵌入模式 /pcl run+协议代理+stdout 独占+A520 护栏）、M4 ⏳（嵌入上下文接续）。M2/M3 冒烟实测记录见 DESIGN §16。
+里程碑：M0 ✅（编译器+gen/check+黄金快照）、M1 ✅（runtime+Null/Script 桥+e2e+importer）、M2 ✅（PiBridge+pcl-connector+上下文三指令+冒烟）、M3 ✅（嵌入模式 /pcl run+协议代理+stdout 独占）、M4 ✅（嵌入上下文接续：模块级桥/接管规则/auto-follow/孤儿路径/跨 cwd 预检 A522/L1 降级 A523）。M2–M4 冒烟实测记录见 DESIGN §16。
 
 ## 文档
 
@@ -48,4 +48,4 @@ uvx pclang run demo.pcl "猫为什么会打呼噜"  # 或 pipx install pclang（
 
 v0.1 要点：表达式/语句/库全部是 Python——插值双形式 `${}`/`$()`（内容同为任意 Python 简单语句：表达式值插入输出、赋值/`import` 等静默执行，丢弃返回值用 `_ =` 前缀；无 `:py`/`:set`/`:call` 之分）：`${}` 发起型（冲刷保序、表达式独立 emit、行号 1:1）、`$()` 合并型（立即求值、织入所在段落单条 emit）；控制流一律 `:if…:fi` / `:for|:while…:done` 指令对，零 `:` 块语法；缩进无语义（编译剥除行首/行尾空白，源码可自由缩进排版）；裸糖 `$prompt`（文本位置 ≡ `$(prompt)`）= argv 输入 / 函数输入（`${:function NAME(参数列表)}` 复用 Python 形参语法，缺省 `(prompt="")`）；`${:pass :read/:write 名字}` 开启一轮 agent 交互（read/write 各一个名字；prompt 独立 sink 隔离，体为纯输出构造，遇下一指令或 EOF 自动提交），回复进输出文档并存入 `reply`；`${r"""…"""}` 原始三引号字符串（可跨行）输出含 `${` 的大段文本不转义；上下文三指令 `:save`/`:load`/`:new`（`:save cx` 把当前会话的 token 存入变量 `cx`，`:load cx` 取值切换；无映射文件，跨运行把 token 存进自己的文件即可），pass 默认追加当前上下文，压缩信任 agent 自带机制。`.pcl` 即 Python 模块：双向 import 兼容（`import pcl; pcl.install_importer()` 后 `import mytpl as t`；DSL 内 `${import helpers as h}`），import 只执行加载层（定义），永不触发 agent。
 
-状态：v0.1 设计已终审（DSL/DESIGN 冻结，含全部终审轮次修订与终审后补丁：插值双形式 `${}`/`$()`、裸糖 `$prompt`、转义 `$$`、`:read` 快照预序列化冻结、生成侧 `\r` 转义保真等），文档正式冻结。**实现进行中**：M0（tlex/tparse/pygen + `pcl gen/check` + 黄金快照）、M1（runtime + Null/Script 桥 + e2e-script + importer 模块化）与 M2（PiBridge + pcl-connector + 上下文三指令 + 真 agent 冒烟，含 DSL §12 示例对真 LLM 全链路跑通）已完成；M3（嵌入模式 `/pcl run` 命令族+embed 传输+A520 护栏）已完成；M4（嵌入上下文接续 §8.6）待实现。M2/M3 冒烟实测记录见 DESIGN §16。
+状态：v0.1 设计已终审（DSL/DESIGN 冻结，含全部终审轮次修订与终审后补丁：插值双形式 `${}`/`$()`、裸糖 `$prompt`、转义 `$$`、`:read` 快照预序列化冻结、生成侧 `\r` 转义保真等），文档正式冻结。**实现进行中**：M0（tlex/tparse/pygen + `pcl gen/check` + 黄金快照）、M1（runtime + Null/Script 桥 + e2e-script + importer 模块化）与 M2（PiBridge + pcl-connector + 上下文三指令 + 真 agent 冒烟，含 DSL §12 示例对真 LLM 全链路跑通）已完成；M3（嵌入模式 `/pcl run` 命令族+embed 传输）与 M4（嵌入上下文接续 §8.6：模块级桥、接管规则、auto-follow、孤儿路径、A521/A522/A523）已完成——v0.1 里程碑 M0–M4 全部交付。M2–M4 冒烟实测记录见 DESIGN §16。
