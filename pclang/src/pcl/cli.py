@@ -119,6 +119,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.cmd == "run":
             from .runtime import run_program
 
+            if args.agent == "embed":
+                if not args.output:
+                    sys.stderr.write(
+                        "pcl: 错误：--agent embed 强制 -o（嵌入形态 stdout 让给协议，§8.5；"
+                        "通常由 pi 内 /pcl run 自动生成）\n")
+                    return 1
+                # stdout 协议独占：模板/用户 Python 的 stdout 重定向到 stderr
+                sys.stdout = sys.stderr
+
             prompt = " ".join(args.prompt) if args.prompt else (
                 args.prompt_opt or "")
             var_overrides = _parse_var(args.var)

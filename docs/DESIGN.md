@@ -553,3 +553,9 @@ M2 前原定协议 spike 已**按 rpc.md 与 pi 源码落定**（§8.1–8.3）�
 2. **§9.2 pcl_write 参数 schema**：冻结稿建议 `Type.Record(Type.String(), Type.Unknown())` 直接作 parameters。实测：pi 的工具参数校验层会把**顶层开放形状**（Record / `additionalProperties`）剥空（`tool_execution_start` 事件层 args 即为 `{}`）；命名键承载完好。修正：pcl_write 经命名键 `values` 嵌套（`Type.Object({values: Type.Record(...)})`，严格 schema 下外层恒为包装、桥侧解包无歧义），execute 同时兼容平铺形态兜底。工具参数形态属连接器内部 UX、不在冻结协议面（`/pcl pass` 信令三键不变）。
 
 其余复核项与冻结稿一致：`get_commands` 去重探测（重复注册 → `/pcl:1`、`/pcl:2`）、`sessionFile` token、`set_session_name` 后重取、惰性落盘（R20）与 `:load` 预检 R430、`switch_session` 失败/取消语义、无 sessionFile 时 `:save` → A501。
+
+**M3 冒烟复核追加（同日，嵌入形态）**：
+
+3. **嵌入读线程与解释器关闭**：嵌入传输的读线程若阻塞在 `sys.stdin.buffer`（BufferedReader），解释器关闭时会因缓冲锁冲突致命中止（实测 SIGABRT、宿主侧退出码 null）。修正：读线程经 `select` + `os.read` 直读 fd、不触碰缓冲包装（daemon 线程随进程退出，无锁冲突）。
+4. **§8.5 提交期失败可见性（嵌入）**：正向形态的 `<runtime>`/`send_user_message` extension_error 经 RPC 流出（M2 已接）；嵌入形态无 RPC 客户端且扩展不可订阅该事件——连接器以 **agent_start 存活检测**兜底（提交后 15s 未观测到 agent 启动即合成 `command:pcl` 错误事件 → pcl A501）。
+5. **`/pcl run` 选项切分**：与 argparse 对齐取「首个 `-` 开头 token 起为选项尾」（规范文本写作「`--` 开头」，按 CLI 实义执行——`-o` 亦为选项）；字面 `--` 其后 token 并入 PROMPT。

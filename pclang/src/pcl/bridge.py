@@ -156,6 +156,10 @@ def make_bridge(agent: str, *, script: str | Path | None = None,
         return PiBridge(pi_bin=pi_bin or "pi", connector_path=connector_path,
                         pi_args=pi_args, timeout=timeout or 300.0, trace=tracer)
     if agent == "embed":
-        raise NotImplementedError(
-            "嵌入模式（--agent embed，由 pi 内 /pcl run 拉起）属 M3 里程碑，尚未交付")
+        from .pibridge import PiBridge
+        tracer = None
+        if trace:
+            import sys
+            tracer = lambda d: sys.stderr.write(d)  # noqa: E731
+        return PiBridge(timeout=timeout or 300.0, trace=tracer, embed=True)
     raise NotImplementedError(f"未知 agent：{agent!r}")
