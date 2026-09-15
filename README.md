@@ -2,6 +2,24 @@
 
 编排 LLM/agent 的模板 DSL：**模板层是 PCL，脚本层是真 Python**。纯 Python 包（≥3.10，零第三方依赖），把 `.pcl` 编译成可读的 Python 源码并在同一解释器中执行，完整复用 Python 生态（含 C 扩展）。首个适配的外部 agent 为 [pi](https://github.com/earendil-works/pi-coding-agent)：拉起 `pi --mode rpc`，经 stdio JSONL 驱动 pcl-connector 扩展完成 pass 交互与上下文管理；反向亦通——连接器在 pi 内注册与 CLI 对齐的 `/pcl` 命令族，`/pcl run f.pcl P` 在当前会话中直接执行（DESIGN.md §8.5/§9.1）。
 
+## 构建与安装
+
+```bash
+cd pclang
+uv build                                        # → dist/pclang-<ver>.tar.gz + .whl（纯 Python、零依赖）
+uv tool install --force dist/pclang-*.whl      # 全局安装：pcl / pclang → ~/.local/bin
+# 等价：pipx install pclang / uvx pclang（发布到 PyPI 后）
+```
+
+pi 连接器预装（正向 `--agent pi` 免 `--connector-path`，DESIGN §12 路径①）：
+
+```bash
+ln -sfn $PWD/pcl-connector ~/.pi/agent/extensions/pcl-connector
+pcl run demo.pcl "主题" --agent pi              # 连接器从扩展目录自动加载
+```
+
+嵌入形态（pi 会话内 `/pcl run`）经 PATH 解析 pcl（`PCL_BIN` 可覆盖）。
+
 ## 开发
 
 ```bash
