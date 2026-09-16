@@ -21,6 +21,7 @@ import tokenize as _tk
 
 from .tparse import (
     Break,
+                     Context,
     Continue,
     For,
     Function,
@@ -243,6 +244,14 @@ class _Emitter:
     def emit_node(self, nd):
         if isinstance(nd, Text):
             self.append_const(nd.text, nd.line)
+        elif isinstance(nd, Context):
+            self.flush()
+            self.uses.update(("push_sink", "pop_sink", "context"))
+            self.w("push_sink()", nd.line)
+            self.emit_children(nd.body)
+            self.flush()
+            self.w("__pcl_ctx = pop_sink()", nd.line)
+            self.w("context(__pcl_ctx)", nd.line)
         elif isinstance(nd, Note):
             # 注记：body 为完整模板体——push_sink 渲染后 pop_sink 取文本，
             # 经 note() 下发（独立→输出文档；嵌入→会话 custom 条目）
@@ -402,7 +411,7 @@ def _main_globals(nodes: list) -> set[str]:
 
 
 _RUNTIME_ORDER = ("emit", "text", "submit", "push_sink", "pop_sink",
-                  "note", "save", "load", "new_ctx", "__pcl_freeze")
+                  "note", "context", "save", "load", "new_ctx", "__pcl_freeze")
 
 
 def _is_load_item(nd) -> bool:

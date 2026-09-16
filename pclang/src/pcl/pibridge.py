@@ -302,6 +302,13 @@ class PiBridge(IAgentBridge):
         if self._transport is not None:
             self._transport.close()
 
+    def context(self, text: str) -> None:
+        """上下文注入：forward 经 steer（独立用户消息排队）；embed 经 context 命令。"""
+        if self.embed:
+            self._call({"type": "context", "text": text})
+        else:
+            self._send({"type": "steer", "message": text})
+
     def note(self, text: str) -> bool:
         """嵌入形态：注记经 note 命令下发（连接器 appendEntry 进会话流）；
         正向形态返回 False（回落输出文档）。"""

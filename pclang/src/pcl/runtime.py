@@ -260,6 +260,11 @@ def new_ctx() -> None:
     _require_run().bridge.new_ctx()
 
 
+def context(text: str) -> None:
+    """上下文注入 ``$(@ … @)``：独立用户消息注入 agent 会话，不触发推理。"""
+    _require_run().bridge.context(text)
+
+
 def note(text: str) -> None:
     """注记 ``$(# …)``：桥接层支持（嵌入形态）则下发为会话 custom 条目，
     否则（独立运行）渲染进输出文档——两种形态均不进 LLM 上下文。"""

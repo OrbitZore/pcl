@@ -105,6 +105,22 @@ class NoteTok:
         return False   # 注记产生输出——独行不消除
 
 
+class ContextTok:
+    """上下文注入 ``$(@ … @)``：完整模板体（递归 tokenize）。渲染结果作为
+    独立用户消息注入 agent 会话——不触发 LLM 推理。"""
+    __slots__ = ("tokens", "line", "col")
+    def __init__(self, tokens, line, col):
+        self.tokens = tokens
+        self.line = line
+        self.col = col
+    @property
+    def no_output(self):
+        return True
+
+class _ContextItem:
+    __slots__ = ("tok",)
+    def __init__(self, tok): self.tok = tok
+
 class _NoteItem:
     __slots__ = ("tok",)
 
@@ -282,6 +298,8 @@ class _Scanner:
         elif src[i + 1] == "(" and content_off < self.n and src[content_off] == "#":
             # 注记模板 $(# … #)：内容为完整模板体，闭合 #)
             return self._note(start_off, content_off, row, col)
+        elif src[i + 1] == "(" and content_off < self.n and src[content_off] == "@":
+            return self._context(start_off, content_off, row, col)
         closer = "}" if src[i + 1] == "{" else ")"
         form = "{" if closer == "}" else "("
         closer_off, saw_nl = self._find_closer(content_off, closer)
@@ -295,6 +313,19 @@ class _Scanner:
         stmts = parse_interp_content(content, self.file, row, col + 1)
         self.items.append(_InterpItem(InterpTok(form, content, stmts, row, col + 1)))
         return closer_off + 1
+
+    def _context(self, start_off: int, at_off: int, row: int, col: int) -> int:
+        close = self.src.find("@)", at_off + 1)
+        if close == -1:
+            raise PclCompileError("L100", "上下文注入 $(@ … @) 未闭合（缺少 @)）",
+                                file=self.file, line=row, col=col + 1)
+        body = self.src[at_off + 1:close].strip("\n")
+        try:
+            sub_tokens = tokenize(body, self.file)
+        except PclCompileError:
+            raise
+        self.items.append(_ContextItem(ContextTok(sub_tokens, row, col + 1)))
+        return close + 2
 
     def _note(self, start_off: int, hash_off: int, row: int, col: int) -> int:
         """``$(# … #)``：内容为完整模板体（可跨行），闭合符为字面 ``#)``。
@@ -439,7 +470,7 @@ class _Scanner:
 
         texts = [it for it in items if isinstance(it, _TextItem)]
         constructs = [it for it in items
-                      if isinstance(it, (_InterpItem, _DirItem, _NoteItem))]
+                      if isinstance(it, (_InterpItem, _DirItem, _NoteItem, _ContextItem))]
 
         if not constructs:
             text = "".join(it.text for it in texts)
@@ -447,7 +478,7 @@ class _Scanner:
             return
 
         if texts or not all(
-            it.tok.no_output if isinstance(it, (_InterpItem, _NoteItem)) else True
+            it.tok.no_output if isinstance(it, (_InterpItem, _NoteItem, _ContextItem)) else True
             for it in constructs
         ):
             # 含文本或含输出构造：整行保留

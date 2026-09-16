@@ -47,6 +47,10 @@ class IAgentBridge(ABC):
     def new_ctx(self) -> None:
         """新建匿名上下文并切换。"""
 
+    def context(self, text: str) -> None:
+        """上下文注入：独立用户消息排队（不触发推理）。"""
+        pass
+
     def note(self, text: str) -> bool:
         """注记通道：返回 True 表示已消费（如嵌入形态→会话 custom 条目）；
         False = 不支持，由 runtime 回落渲染进输出文档。"""

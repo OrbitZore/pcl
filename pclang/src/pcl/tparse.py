@@ -24,7 +24,7 @@ import re
 from dataclasses import dataclass, field
 
 from .errors import PclCompileError
-from .tlex import DirTok, InterpTok, NoteTok, TextTok
+from .tlex import ContextTok, DirTok, InterpTok, NoteTok, TextTok
 
 # 运行时保留名（DSL §9.2：9 名一律保留，无论是否用到；note 为 v0.2 新增）
 RUNTIME_RESERVED = frozenset({
@@ -49,6 +49,11 @@ class Node:
 class Text(Node):
     text: str
 
+
+@dataclass
+class Context(Node):
+    "上下文注入：独立用户消息，不触发推理。"
+    body: list = field(default_factory=list)
 
 @dataclass
 class Note(Node):
@@ -259,6 +264,13 @@ class _Parser:
                 body, j = sub.parse_seq(0, top=False, in_function=False,
                                         in_loop=False)
                 nodes.append(Note(t.line, t.col, body))
+                i += 1
+                continue
+            if isinstance(t, ContextTok):
+                sub = _Parser(t.tokens, self.file if hasattr(self, "file") else "?")
+                body, j = sub.parse_seq(0, top=False, in_function=False,
+                                        in_loop=False)
+                nodes.append(Context(t.line, t.col, body))
                 i += 1
                 continue
             if isinstance(t, InterpTok):

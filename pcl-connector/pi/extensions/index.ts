@@ -364,6 +364,22 @@ class Bridge {
         await this.contextOp(cmd, respond);
         return;
       }
+      case "context": {
+        // 上下文注入 $(@ … @)：sendMessage triggerTurn=false——进入 LLM
+        // 上下文但不触发推理（下一 prompt 时投递）
+        try {
+          latestPi!.sendMessage({
+            customType: "pcl-context",
+            content: String(cmd.text ?? ""),
+            display: false,
+          }, { triggerTurn: false, deliverAs: "nextTurn" });
+          respond(this.ok(id, "context"));
+        } catch (err) {
+          respond(this.fail(id, "context",
+            err instanceof Error ? err.message : String(err)));
+        }
+        return;
+      }
       case "note": {
         // 模板注记 $(# …)：附加进会话流（custom entry，不进 LLM 上下文）
         try {
@@ -616,16 +632,10 @@ async function runEmbedded(ctx: ExtensionCommandContext, tokens: string[]): Prom
     // 运行中可能发生会话替换（:new/:load）：呈现用最新绑定（旧 ctx 已过期）
     const ui = bridge.ui() ?? ctx.ui;
     if (code === 0) {
-      appendResult(latestPi!, `pcl run 完成（退出码 0）：${file}`,
-                   output.split("\n"), outPath);
-      ui.notify?.(`pcl run 完成（退出码 0）`, "info");
+      ui.notify?.(`pcl run 完成（退出码 0）· 输出：${outPath}`, "info");
     } else {
-      const tail = bridge.stderr().trim();
-      appendResult(latestPi!, `pcl run 失败（退出码 ${code ?? "?"}）：${file}`,
-                   [...output.split("\n"),
-                    ...(tail ? ["--- stderr 尾部 ---", ...tail.split("\n")] : [])],
-                   outPath);
-      ui.notify?.(`pcl run 失败（退出码 ${code ?? "?"}）`, "error");
+      const tail = bridge.stderr().trim().split("\n").slice(-5).join(" | ");
+      ui.notify?.(`pcl run 失败（退出码 ${code ?? "?"}）· ${tail}`, "error");
     }
   } finally {
     if (moduleBridge === bridge) moduleBridge = null;
