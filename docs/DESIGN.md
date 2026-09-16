@@ -96,8 +96,13 @@ pcl/                       # 单仓两包：主包与 connector 拆包分开发�
 │  │  ├─ pibridge.py     # PiBridge：子进程、JSONL、上下文切换（token 生成/解析）
 │  │  └─ cli.py          # argparse 入口
 │  └─ tests/             # pytest（见 §11）
-└─ pcl-connector/          # pi 扩展（独立分发，不在 Python wheel 内；安装方式见 §12）
-   └─ index.ts             # 无构建：pi 经 jiti 直接加载 TS
+└─ pcl-connector/          # agent 后端连接器族（独立分发，不在 Python wheel 内；多后端只增子包，见 §12/§16-10）
+   ├─ README.md            # 子包约定与新增后端指引
+   └─ pi/                  # pi 适配子包（pi-package：package.json + pi 清单）
+      ├─ package.json      # 分发名 pcl-connector-pi；peerDeps（pi-coding-agent/typebox，*）
+      ├─ README.md         # 安装（pi install / -e / 预装）、卸载与兼容性
+      └─ extensions/
+         └─ index.ts       # 无构建：pi 经 jiti 直接加载 TS
 ```
 
 ```toml
@@ -492,7 +497,7 @@ pcl version
 - **拆包**：主包与 connector 分开发布、互不依赖——Python wheel **不内置** `pcl-connector`（目录布局按此拆分，§4）；
 - `pipx install pclang` / `uvx pclang` 即用（**分发名 `pclang`**——`pcl` 已被 PyPI 占位包占用；import 名与 CLI 命令仍为 `pcl`：`pip install pclang` → `import pcl` / `pcl run`；uvx/pipx 按**可执行名**匹配，`pclang` 别名脚本（§4）使 `uvx pclang` 直接可用，否则需 `uvx --from pclang pcl`）；也可在项目内作库使用；
 - CI 矩阵：Python 3.10–3.14 × Linux/macOS；
-- `pcl-connector`（本仓 `pcl-connector/`）无构建——pi 经 jiti 直接加载 TS；安装二选一：① 复制/链接到 pi 扩展目录（预装，`--connector-path` 缺省 `none` 即用），② `--connector-path` 直指 `index.ts` 源文件。缺失/未注册 → A500（报错附上述两条出路）；
+- `pcl-connector`（本仓 `pcl-connector/pi/`，pi-package：`package.json` 的 `pi` 清单 + `extensions/index.ts`）无构建——pi 经 jiti 直接加载 TS；安装三选一：① **pi 包安装**（`pi install <repo>/pcl-connector/pi`；发布后 `pi install npm:pcl-connector-pi` / git 源；`pi -e` 临时试用；`pi remove` 卸载），② 预装——复制/链接到 pi 扩展目录（`--connector-path` 缺省 `none` 即用），③ `--connector-path` 直指包目录或 `extensions/index.ts`。缺失/重复注册/未注册 → A500（报错附安装指引）；
 - 连接器仅 `/pcl` 命令族需要宿主侧存在 `pcl` 可执行（PATH 解析，`PCL_BIN` 覆盖）；仅做 pass 交互（正向形态）时无此依赖。
 
 ---
@@ -565,3 +570,8 @@ M2 前原定协议 spike 已**按 rpc.md 与 pi 源码落定**（§8.1–8.3）�
 6. **§8.6 依赖复核（R17）**：`session_shutdown` 事件携带 `reason`（quit/reload/new/resume/fork）与 `targetSessionFile`；`SessionManager.open(path).getCwd()` 在 pi@0.85.1 可用（跨 cwd 预检按此实现）。
 7. **RPC 命令串行**：经 RPC `prompt` 注入的命令在上一命令（含 `/pcl run` 的处理器 await）完成后才执行——无法经 RPC 模拟「用户中途切会话」；auto-follow 场景以 pty 驱动真 TUI 验证（`/new` 中途 → 接续提示 + 后续 `:new` → A523，实测通过）。
 8. **reload 实测良性偏差**：实测 `/reload` 中途发生时旧模块闭包（子进程流监听 + serve 循环 + latestPi）继续服务，run 存活完成（未按 §8.6 预期走孤儿路径）。`broken` 标记与孤儿兜底保留（`ensureBinding` 逐命令回 embed-orphaned、时限后关 stdin）；reload 未触发 handler 的机理（模块缓存行为）列为后续观察项。
+
+
+**v0.2 结构调整（2026-09-16，多 agent 后端准备）**：
+
+10. **pcl-connector 子包化**：`pcl-connector/index.ts` → `pcl-connector/pi/extensions/index.ts`，`pi/` 成为独立 pi-package（`package.json`：`pi` 清单 + `pi-package` 关键字 + peerDeps `@earendil-works/pi-coding-agent`/`typebox` 均 `*`，分发名 `pcl-connector-pi`）——为多 agent 后端做准备（§3"其他 agent 工具只增适配子包"/§15）：后续后端各自成 `pcl-connector/<backend>/` 子包，语言契约侧（pass 信令/读写工具/上下文语义）收敛在子包内，Python 侧经 `IAgentBridge` 对应扩展。pi 包全流程实测：`pi install <本地路径>`（写 settings `packages`，相对路径形态）→ 正向 `--agent pi` 与嵌入 `/pcl run` 免 `--connector-path` 全通；`pi -e <包目录>` 临时试用 ✓；`pi remove` ✓；与预装并存会重复注册 → A500（既有去重指引）。`--connector-path` 现接受包目录或 extensions/index.ts 文件。

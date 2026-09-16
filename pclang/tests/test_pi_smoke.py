@@ -26,7 +26,8 @@ import pytest
 from pcl.errors import PclError
 from pcl.pibridge import PiBridge
 
-CONNECTOR = Path(__file__).resolve().parent.parent.parent / "pcl-connector" / "index.ts"
+CONNECTOR = (Path(__file__).resolve().parent.parent.parent
+             / "pcl-connector" / "pi" / "extensions" / "index.ts")
 
 pytestmark = pytest.mark.smoke_pi
 
@@ -35,7 +36,7 @@ requires_pi = pytest.mark.skipif(not shutil.which("pi"), reason="pi 不在 PATH"
 
 def _needs_connector():
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector/index.ts 不在预期位置")
+        pytest.skip("pcl-connector/pi/extensions/index.ts 不在预期位置")
 
 
 def _model_configured(b: PiBridge) -> bool:

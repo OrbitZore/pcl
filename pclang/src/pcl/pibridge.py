@@ -321,9 +321,10 @@ class PiBridge(IAgentBridge):
             raise PclError(
                 "A500",
                 "未检测到 pcl-connector（/pcl 命令未注册）。安装方式二选一：\n"
-                "  ① 复制/链接本仓 pcl-connector/index.ts 到 pi 扩展目录"
-                "（~/.pi/agent/extensions/）；\n"
-                "  ② 运行时用 --connector-path 直指 index.ts 源文件")
+                "  ① pi install <repo>/pcl-connector/pi（pi 包；或发布后 "
+                "npm:pcl-connector-pi / git 源）；\n"
+                "  ② 运行时用 --connector-path 直指 pcl-connector/pi"
+                "（包目录或 extensions/index.ts 文件）")
         if len(pcl_entries) > 1 or pcl_entries[0] != "pcl":
             raise PclError(
                 "A500",

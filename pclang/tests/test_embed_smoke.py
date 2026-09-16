@@ -15,7 +15,8 @@ import pytest
 
 from pcl.pibridge import PiBridge
 
-CONNECTOR = Path(__file__).resolve().parent.parent.parent / "pcl-connector" / "index.ts"
+CONNECTOR = (Path(__file__).resolve().parent.parent.parent
+             / "pcl-connector" / "pi" / "extensions" / "index.ts")
 PCL_BIN = Path(__file__).resolve().parent.parent / ".venv" / "bin" / "pcl"
 DATA = Path(__file__).resolve().parent / "data"
 
@@ -113,7 +114,7 @@ class _Session:
 @requires_pcl
 def test_pcl_gen_passthrough(tmp_path, monkeypatch):
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     with _Session(tmp_path, monkeypatch) as s:
         resp = s.send_command(f"/pcl gen {DATA / 'demo.pcl'}")
         assert resp is not None and resp.get("success")
@@ -124,7 +125,7 @@ def test_pcl_gen_passthrough(tmp_path, monkeypatch):
 @requires_pcl
 def test_pcl_version_passthrough(tmp_path, monkeypatch):
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     with _Session(tmp_path, monkeypatch) as s:
         resp = s.send_command("/pcl version")
         assert resp is not None and resp.get("success")
@@ -135,7 +136,7 @@ def test_pcl_version_passthrough(tmp_path, monkeypatch):
 @requires_pcl
 def test_pcl_run_forward_only_rejected(tmp_path, monkeypatch):
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     with _Session(tmp_path, monkeypatch) as s:
         resp = s.send_command(f"/pcl run {DATA / 'demo.pcl'} --agent null")
         assert resp is not None and resp.get("success")   # 命令本身完成
@@ -147,7 +148,7 @@ def test_pcl_run_forward_only_rejected(tmp_path, monkeypatch):
 def test_pcl_run_save_without_model(tmp_path, monkeypatch):
     """:save 冒烟（M3 验收项）：无 pass → 不涉 LLM，token 经合成 get_state 取得。"""
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     tpl = tmp_path / "save.pcl"
     tpl.write_text("${:save cx}\nLEN=$(len(cx) > 0)\n", encoding="utf-8")
     out = tmp_path / "out.txt"
@@ -164,7 +165,7 @@ def test_pcl_run_new_ctx_now_works(tmp_path, monkeypatch):
     """M4 后 :new 在嵌入形态真正可用（旧 A520 护栏仅对旧版连接器，
     pcl 侧映射由伪嵌入宿主单测覆盖）。"""
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     tpl = tmp_path / "new.pcl"
     tpl.write_text("A\n${:new}\nB\n", encoding="utf-8")
     out = tmp_path / "out.txt"
@@ -180,7 +181,7 @@ def test_pcl_run_new_ctx_now_works(tmp_path, monkeypatch):
 def test_pcl_run_embedded_e2e(tmp_path, monkeypatch):
     """/pcl run 全链路：pass + pcl_write 写回 + 分支（真 LLM）。"""
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     with _Session(tmp_path, monkeypatch) as s:
         if not s.model_configured():
             pytest.skip("未配置模型")
@@ -201,7 +202,7 @@ def test_pcl_run_embedded_e2e(tmp_path, monkeypatch):
 def test_embed_new_ctx_lands_new_session(tmp_path, monkeypatch):
     """:new → 真会话替换（withSession 接管）→ 后续 pass 落新会话、token 更新。"""
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     tpl = tmp_path / "newctx.pcl"
     tpl.write_text(
         "${:pass}\n只回复一个字：好\n${:save cx}\n"
@@ -223,7 +224,7 @@ def test_embed_new_ctx_lands_new_session(tmp_path, monkeypatch):
 def test_embed_save_load_roundtrip(tmp_path, monkeypatch):
     """:save → :new → :load（同 cwd）往返；恢复的会话看得到原 pass 内容。"""
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     tpl = tmp_path / "roundtrip.pcl"
     tpl.write_text(
         "${:pass}\n请只回复一个关键词：蓝色\n${:save cx}\n"
@@ -248,7 +249,7 @@ def test_embed_save_load_roundtrip(tmp_path, monkeypatch):
 def test_embed_load_cross_cwd_a522(tmp_path, monkeypatch):
     """:load 目标 cwd ≠ 当前 → A522（引导正向 CLI）。"""
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     # 在别的 cwd 造一个已落盘会话（一次 assistant 回复强制 flush，R20）
     import subprocess as sp
     import threading
@@ -383,7 +384,7 @@ def _drive_tui(steps: list, settle: float = 6.0, poll: str = "退出码",
 def test_embed_auto_follow_tui_a523(tmp_path, monkeypatch):
     """TUI 用户 /new 中途切换 → auto-follow 接续（L1）→ 后续 :new → A523。"""
     if not CONNECTOR.exists():  # pragma: no cover
-        pytest.skip("pcl-connector 不在预期位置")
+        pytest.skip("pcl-connector/pi 不在预期位置")
     monkeypatch.setenv("PCL_BIN", str(PCL_BIN))
     tpl = tmp_path / "follow.pcl"
     tpl.write_text(

@@ -21,11 +21,13 @@ uv tool install --force dist/pclang-*.whl      # 全局安装：pcl / pclang →
 # 等价：pipx install pclang / uvx pclang（发布到 PyPI 后）
 ```
 
-pi 连接器预装（正向 `--agent pi` 免 `--connector-path`，DESIGN §12 路径①）：
+pi 连接器安装（正向 `--agent pi` 免 `--connector-path`，DESIGN §12）：
 
 ```bash
-ln -sfn $PWD/pcl-connector ~/.pi/agent/extensions/pcl-connector
-pcl run demo.pcl "主题" --agent pi              # 连接器从扩展目录自动加载
+pi install $PWD/pcl-connector/pi      # ① pi 包（推荐；pi -e 同路径可临时试用）
+# ② 预装：ln -sfn $PWD/pcl-connector/pi/extensions ~/.pi/agent/extensions/pcl-connector-pi
+# ③ 运行时：--connector-path $PWD/pcl-connector/pi
+pcl run demo.pcl "主题" --agent pi    # 连接器自动加载
 ```
 
 嵌入形态（pi 会话内 `/pcl run`）经 PATH 解析 pcl（`PCL_BIN` 可覆盖）。

@@ -26,6 +26,14 @@
   （`PCL_FUZZ_ITERS`/`PCL_FUZZ_SEED` 覆盖）——模板编译不崩溃/确定性，
   JSONC 剥离不崩溃/合法 JSON 不变/字符串免疫
 
+### 结构调整
+
+- **pcl-connector 子包化**（多 agent 后端准备）：`index.ts` → `pi/extensions/index.ts`，
+  `pi/` 成为独立 pi-package（`pcl-connector-pi`：`pi` 清单 + peerDeps）；
+  pi 包全流程打通并实测（`pi install` 本地路径 / `pi -e` 临时 / `pi remove`）；
+  `--connector-path` 接受包目录或 extensions/index.ts；后续后端各自成
+  `pcl-connector/<backend>/` 子包（约定见 pcl-connector/README.md）
+
 ### 修复
 
 - `--` 分隔符改为版本无关预处理：argparse 对「子命令 + `nargs="*"`
