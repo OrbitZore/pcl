@@ -153,8 +153,21 @@ def json_dumps(v) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # ``--`` 分隔符预处理（版本无关）：argparse 对子命令 + nargs="*" 位置参数
+    # 的 ``--`` 语义随 Python 版本漂移（≤3.13 视为无法识别的参数、3.14 并入
+    # 位置参数）——首个 ``--`` 后的 token 一律并入 PROMPT、自身移除（§10），
+    # 与连接器侧 /pcl run 的切分规则一致（§9.1）。
+    argv = list(sys.argv[1:] if argv is None else argv)
+    extra_prompt: list[str] = []
+    if argv and argv[0] == "run":
+        if "--" in argv:
+            i = argv.index("--")
+            extra_prompt = argv[i + 1:]
+            argv = argv[:i]
     try:
         args = build_parser().parse_args(argv)
+        if args.cmd == "run":
+            args.prompt = list(args.prompt) + extra_prompt
     except SystemExit as e:   # 用法错（argparse 2 → 1，§10）
         return int(e.code or 0) if e.code else 1
 
