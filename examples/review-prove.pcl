@@ -1,61 +1,64 @@
 #!/usr/bin/env pcl
 ${import json}
 
-${:# 场景：审查报告 → 自证循环——直到全部主张可信（或达轮次上限）}
-${:# 终态结论经 $(# … #) 注记输出——不进 LLM 上下文（嵌入=会话条目/独立=输出文档）}
+${:# Review-and-prove loop: refine claims until all credible (or round limit)}
+${:# Final verdict goes out via $(# … #) note output — never enters LLM context}
 ${ROUND = 0}
 ${BRAINSTORM = []}
-${ALL = []}
 ${PENDING = []}
-${COUNT = 0}
 ${MAX_ROUNDS = 4}
 ${TOPIC = prompt}
 
 ${:pass :write BRAINSTORM}
-你是严谨的审查员。请对下述主题发散列出所有正向与反向观点，
-把全部观点以字符串数组（可为空 []）调用 pcl_write 写入 BRAINSTORM。
-主题：$(TOPIC)
+You are a rigorous reviewer. Brainstorm all pro and con viewpoints
+on the topic below, then call pcl_write exactly once, with the whole
+list nested under the single key BRAINSTORM (a string array, may be empty []):
+{"BRAINSTORM": ["viewpoint 1", "viewpoint 2", ...]}
+Topic: $(TOPIC)
 
 ${:while ROUND < MAX_ROUNDS}
     ${ROUND = ROUND + 1}
     ${RESULT = {}}
     ${:new}
     ${:pass :write RESULT}
-    你是严谨的审查员。请对下述全部观点逐条审查、自评：
-    - 标注【可信】（常识/公理/可直接验证）或【存疑】（需证据或推导）；
-    - 对每条存疑观点就地给出证明（推理、例子或引理），证明后重新自评；
-    - 最终调用 pcl_write 把结果写入 RESULT（一个 JSON 对象）：
-      {"all": [审查后的全部观点], "pending": [仍存疑的观点（字符串数组，可为空）]}
+    You are a rigorous reviewer. Audit each viewpoint below and self-assess:
+    - Mark it 【credible】 (common sense / axiom / directly verifiable) or
+      【doubtful】 (needs evidence or derivation);
+    - For each doubtful viewpoint, prove it in place (reasoning, example or
+      lemma), then re-assess;
+    - Finally call pcl_write exactly once, with the whole result nested under the
+      single key RESULT (a JSON object):
+      {"RESULT": {"all": [all reviewed viewpoints], "pending": [still-doubtful ones (string array, may be empty)]}}
+      Do not call pcl_write a second time.
 
-    待审查观点（原始发散 $(len(BRAINSTORM)) 条）：
+    Viewpoints to audit (originally $(len(BRAINSTORM)) items):
     $(json.dumps(BRAINSTORM, ensure_ascii=False))
 
     $((json.dumps(PENDING, ensure_ascii=False) + "\n") if PENDING else "")
-    当前轮次：第 $(ROUND) 轮
-    ${ALL = RESULT.get("all") or BRAINSTORM}
-    ${PENDING = RESULT.get("pending") or []}
-    ${COUNT = len(PENDING)}
-    ${:if COUNT == 0}
+    Current round: $(ROUND)
+    ${:# :if condition evaluates after writeback — RESULT is this round's result}
+    ${:if isinstance(RESULT, dict) and not (RESULT.get("pending") or [])}
         ${:break}
     ${:fi}
+    ${PENDING = RESULT.get("pending") or []}
 ${:done}
 
-${:if COUNT == 0}
+${:if isinstance(RESULT, dict) and not (RESULT.get("pending") or [])}
 $(#
-✔ 全部主张已在第 $(ROUND) 轮达成可信。
-原始发散 $(len(BRAINSTORM)) 条 / 最终全部 $(len(ALL)) 条：
-${:for c in ALL}
+✔ All claims credible as of round $(ROUND).
+Origin $(len(BRAINSTORM)) / final $(len(RESULT.get("all") or BRAINSTORM)) items:
+${:for c in (RESULT.get("all") or BRAINSTORM)}
 - $(c)
 ${:done}
 #)
 ${:else}
 $(#
-✘ 达到轮次上限（$(MAX_ROUNDS) 轮），仍有 $(COUNT) 条存疑。
-全部论点（$(len(ALL)) 条）：
-${:for c in ALL}
+✘ Round limit reached ($(MAX_ROUNDS)), $(len(PENDING)) still doubtful.
+All claims ($(len(RESULT.get("all") or BRAINSTORM)) items):
+${:for c in (RESULT.get("all") or BRAINSTORM)}
 - $(c)
 ${:done}
-存疑论点：
+Doubtful claims:
 ${:for c in PENDING}
 - $(c)
 ${:done}

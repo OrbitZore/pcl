@@ -17,32 +17,36 @@ PCL compiles `.pcl` templates into readable Python source and executes them in t
 
 The first supported agent is [pi](https://github.com/earendil-works/pi-coding-agent): forward mode spawns `pi --mode rpc` for pass interaction and context management; embedded mode runs PCL directly inside a pi session via `/pcl` commands.
 
+/goal-style goal-achievement loop (like the /goal feature in other agents — single context, full history, break when done):
+
 ```text
 ${ROUND = 0}
 ${DONE = False}
+${W = ""}
 ${MAX = 100}
 
 $(@
-Goal: $prompt
-Each round: 1) act to progress 2) check if done. Max ${MAX} rounds.
+Task goal: $prompt
+Each round: 1) act 2) check if done. Max ${MAX} rounds.
 @)
 
 ${:while ROUND < MAX}
     ${ROUND = ROUND + 1}
 
-    ${:new}
     ${:pass :read ROUND :write W}
-    Act toward the goal (round $(ROUND)). Write to W: {"W": "action summary"}
+    Executor (round $(ROUND)): take action toward the goal.
+    Call pcl_write with: {"W": "one-line action summary"}
 
-    ${:new}
     ${:pass :read ROUND :write W}
-    Check if goal achieved. Write to W: {"W": {"done": true/false, "note": "reason"}}
+    Inspector: last action was "$(W)". Judge if the goal is achieved.
+    Call pcl_write with: {"W": {"done": true/false, "note": "verdict"}}
 
-    ${:if 1}
-    ${DONE = W.get("done") if isinstance(W, dict) else False}
-    $(# Round $(ROUND): $(("✅ done" if DONE else "⏳ in progress")) #)
-    ${:if DONE}${:break}${:fi}
+    ${:# the :if condition evaluates after writeback — W is Pass 2's result}
+    ${:if isinstance(W, dict) and W.get("done")}
+        ${DONE = True}
+        ${:break}
     ${:fi}
+    $(# Round $(ROUND) — ⏳ in progress #)
 ${:done}
 
 ${:if DONE}

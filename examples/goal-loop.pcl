@@ -1,57 +1,42 @@
 #!/usr/bin/env pcl
-${import json}
-
-${:# 场景：目标达成循环——每轮两 pass（执行+检查），DONE 为真则 break}
+${:# /goal-style goal-achievement loop: two passes per round (act + check), break when done}
+${:# Like the /goal feature in other agents: single context (no :new), agent keeps full history}
 ${ROUND = 0}
 ${DONE = False}
-${LAST_ACTION = ""}
+${W = ""}
 ${MAX = 100}
 
 $(@
-任务目标：$prompt
-每轮两步：1.执行推进 2.检查是否达成。最多 ${MAX} 轮。
+Task goal: $prompt
+Each round has two steps: 1) act to progress 2) check if done. Max ${MAX} rounds.
 @)
 
 ${:while ROUND < MAX}
     ${ROUND = ROUND + 1}
 
-    ${:# Pass 1：执行}
-    ${:new}
+    ${:# Pass 1: act — write back an action summary (string)}
     ${:pass :read ROUND :write W}
-    你是执行者（第 $(ROUND)/$(MAX) 轮）。目标尚未达成。
-    目标：$prompt
-    上轮行动：$(LAST_ACTION if LAST_ACTION else "（首轮）")
-    请采取行动推进目标。只调用一次 pcl_write 写入：
-    {"W": "你的行动摘要（一句话）"}
+    Executor (round $(ROUND)/$(MAX)): take action toward the goal, or consolidate existing progress.
+    When done, call pcl_write exactly once with:
+    {"W": "one-line action summary"}
 
-    ${:# Pass 2：检查}
-    ${:new}
+    ${:# Pass 2: check — write back {"done": bool, "note": str}}
     ${:pass :read ROUND :write W}
-    你是检查者（第 $(ROUND)/$(MAX) 轮）。判断目标是否已达成。
-    目标：$prompt
-    上轮行动：$(LAST_ACTION)
-    只调用一次 pcl_write 写入：
-    {"W": {"done": true/false, "note": "判定理由（一句话）"}}
+    Inspector (round $(ROUND)/$(MAX)): last action was "$(W if isinstance(W, str) else str(W))".
+    Judge whether the task goal has been achieved.
+    Call pcl_write exactly once with:
+    {"W": {"done": true/false, "note": "one-line verdict"}}
 
-    ${:if 1}
-    ${LAST_ACTION = W if isinstance(W, str) else str(W)}
-    ${_ = W.get("note") if isinstance(W, dict) else None}
-    $(# 第 $(ROUND) 轮：$(_ if _ else LAST_ACTION) — $(("✅ 达成" if isinstance(W, dict) and W.get("done") else "⏳ 进行中")) #)
-    ${DONE = W.get("done") if isinstance(W, dict) and isinstance(W.get("done"), bool) else False}
-    ${:if DONE}
+    ${:# Note: the :if condition evaluates after pass writeback — W is Pass 2's result}
+    ${:if isinstance(W, dict) and W.get("done")}
+        ${DONE = True}
         ${:break}
     ${:fi}
-    ${:fi}
+    $(# Round $(ROUND): $(W.get("note", "") if isinstance(W, dict) else "") — ⏳ in progress #)
 ${:done}
 
 ${:if DONE}
-$(#
-🎉 目标在第 $(ROUND)/$(MAX) 轮达成。
-最后行动：$(LAST_ACTION)
-#)
+$(# 🎉 Goal achieved in round $(ROUND)/$(MAX)#)
 ${:else}
-$(#
-⚠️ 达到上限（$(MAX) 轮），未达成。
-最后行动：$(LAST_ACTION)
-#)
+$(# ⚠️ Round limit reached ($(MAX)), goal not achieved#)
 ${:fi}

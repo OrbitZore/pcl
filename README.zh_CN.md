@@ -17,32 +17,36 @@ PCL 将 `.pcl` 模板编译为可读的 Python 源码并在同一解释器中执
 
 首个适配的 agent 是 [pi](https://github.com/earendil-works/pi-coding-agent)：正向模式拉起 `pi --mode rpc` 完成 pass 交互与上下文管理；嵌入模式在 pi 会话内经 `/pcl` 命令族直接执行。
 
+/goal 式目标达成循环（同其他 agent 的 /goal 功能：单一上下文、完整历史、达成即停）：
+
 ```text
 ${ROUND = 0}
 ${DONE = False}
+${W = ""}
 ${MAX = 100}
 
 $(@
-目标：$prompt
-每轮两步：1.执行推进 2.检查是否达成。最多 ${MAX} 轮。
+任务目标：$prompt
+每轮两步：1. 执行推进 2. 检查是否达成。最多 ${MAX} 轮。
 @)
 
 ${:while ROUND < MAX}
     ${ROUND = ROUND + 1}
 
-    ${:new}
     ${:pass :read ROUND :write W}
-    执行者（第 $(ROUND) 轮）：采取行动推进目标。写入 W：{"W": "行动摘要"}
+    执行者（第 $(ROUND) 轮）：采取行动推进目标。
+    调用 pcl_write 写入：{"W": "行动摘要"}
 
-    ${:new}
     ${:pass :read ROUND :write W}
-    检查者：判断目标是否已达成。写入 W：{"W": {"done": true/false, "note": "理由"}}
+    检查者：上轮行动为「$(W)」。判断目标是否已达成。
+    调用 pcl_write 写入：{"W": {"done": true/false, "note": "理由"}}
 
-    ${:if 1}
-    ${DONE = W.get("done") if isinstance(W, dict) else False}
-    $(# 第 $(ROUND) 轮：$(("✅ 达成" if DONE else "⏳ 进行中")) #)
-    ${:if DONE}${:break}${:fi}
+    ${:# :if 条件在写回之后求值——W 即 Pass 2 的结果}
+    ${:if isinstance(W, dict) and W.get("done")}
+        ${DONE = True}
+        ${:break}
     ${:fi}
+    $(# 第 $(ROUND) 轮 — ⏳ 进行中 #)
 ${:done}
 
 ${:if DONE}
