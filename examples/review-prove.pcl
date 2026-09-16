@@ -3,33 +3,35 @@ ${import json}
 
 ${:# 场景：审查报告 → 自证循环——直到全部主张可信（或达轮次上限）}
 ${ROUND = 0}
+${BRAINSTORM = []}
 ${ALL = []}
+${PENDING = []}
 ${COUNT = 0}
 ${MAX_ROUNDS = 4}
 ${TOPIC = prompt}
 
-${:pass :write ALL}
+${:pass :write BRAINSTORM}
 你是严谨的审查员。请对下述主题发散列出所有正向与反向观点，
-把全部观点以字符串数组（可为空 []）调用 pcl_write 写入 ALL。
+把全部观点以字符串数组（可为空 []）调用 pcl_write 写入 BRAINSTORM。
 主题：$(TOPIC)
 
 ${:while ROUND < MAX_ROUNDS}
     ${ROUND = ROUND + 1}
     ${RESULT = {}}
     ${:new}
-    ${:pass :write RESULT}
+    ${:pass :read ROUND :write RESULT}
     你是严谨的审查员。请对下述主题的正向与反向观点逐条审查、自评：
     - 标注【可信】（常识/公理/可直接验证）或【存疑】（需证据或推导）；
     - 对存疑观点就地给出证明（推理、例子或引理），证明后重新自评；
     - 最终调用 pcl_write 向 RESULT 写入一个 JSON 对象（多值打包进 dict——
       :write 只授权一个名字）：
-      {"all": [所有观点], "pending": [仍存疑的观点（字符串数组，可为空）] }
+      {"all": [所有观点], "pending": [仍存疑的观点（字符串数组，可为空）]}
 
     主题：$(TOPIC)
     上轮仍存疑（请优先证明）：
-    $((json.dumps(ALL, ensure_ascii=False) + "\n") if ALL else "")
+    $((json.dumps(PENDING, ensure_ascii=False) + "\n") if PENDING else "")
     当前轮次：第 $(ROUND) 轮
-    ${ALL = RESULT.get("all") or []}
+    ${ALL = RESULT.get("all") or BRAINSTORM}
     ${PENDING = RESULT.get("pending") or []}
     ${COUNT = len(PENDING)}
     ${:if COUNT == 0}
@@ -38,12 +40,14 @@ ${:while ROUND < MAX_ROUNDS}
 ${:done}
 
 ${:if COUNT == 0}
-$(#✔ 全部主张已在第 $(ROUND) 轮达成可信。#)
-$(# $(ALL) #)
+✔ 全部主张已在第 $(ROUND) 轮达成可信。
+原始发散 $(len(BRAINSTORM)) 条 / 最终全部 $(len(ALL)) 条：
+${:for c in ALL}
+- $(c)
+${:done}
 ${:else}
-$(#✘ 达到轮次上限（$(MAX_ROUNDS) 轮），仍有 $(COUNT) 条存疑：#)
-$(# 通过论点： #)
-$(# $(ALL) #)
-$(# 存疑论点： #)
-$(# $(PENDING) #)
+✘ 达到轮次上限（$(MAX_ROUNDS) 轮），仍有 $(COUNT) 条存疑：
+${:for c in PENDING}
+- $(c)
+${:done}
 ${:fi}
