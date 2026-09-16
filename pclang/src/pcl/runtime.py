@@ -223,10 +223,16 @@ def submit(prompt: str, reads: dict | None = None,
         return PassResult("", {})
     allowed = tuple(writes)
     result = run.bridge.submit(p, reads or {}, allowed)
-    for name in result.writes:
-        if name not in allowed:
+    unauthorized = {k for k in result.writes if k not in allowed}
+    if unauthorized:
+        if len(allowed) == 1 and unauthorized == set(result.writes.keys()):
+            # 自动包装：agent 平铺写 dict（如 {"all":[…],"pending":[…]}）而非
+            # 嵌套进唯一授权名——将整个写入包装为 {授权名: {平铺 dict}}
+            result = PassResult(result.reply, {allowed[0]: dict(result.writes)})
+        else:
+            bad = ", ".join(sorted(unauthorized))
             raise PclError(
-                "R406", f"agent 写入 :write 之外的名字：{name!r}")
+                "R406", f"agent 写入 :write 之外的名字：{bad}")
     for name, value in result.writes.items():
         d = _depth(value)
         if d > _MAX_JSON_DEPTH:

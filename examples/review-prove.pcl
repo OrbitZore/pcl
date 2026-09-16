@@ -2,6 +2,7 @@
 ${import json}
 
 ${:# 场景：审查报告 → 自证循环——直到全部主张可信（或达轮次上限）}
+${:# 终态结论经 $(# … #) 注记输出——不进 LLM 上下文（嵌入=会话条目/独立=输出文档）}
 ${ROUND = 0}
 ${BRAINSTORM = []}
 ${ALL = []}
@@ -23,8 +24,7 @@ ${:while ROUND < MAX_ROUNDS}
     你是严谨的审查员。请对下述主题的正向与反向观点逐条审查、自评：
     - 标注【可信】（常识/公理/可直接验证）或【存疑】（需证据或推导）；
     - 对存疑观点就地给出证明（推理、例子或引理），证明后重新自评；
-    - 最终调用 pcl_write 向 RESULT 写入一个 JSON 对象（多值打包进 dict——
-      :write 只授权一个名字）：
+    - 最终调用 pcl_write 把结果写入 RESULT（一个 JSON 对象）：
       {"all": [所有观点], "pending": [仍存疑的观点（字符串数组，可为空）]}
 
     主题：$(TOPIC)
@@ -40,14 +40,23 @@ ${:while ROUND < MAX_ROUNDS}
 ${:done}
 
 ${:if COUNT == 0}
+$(#
 ✔ 全部主张已在第 $(ROUND) 轮达成可信。
 原始发散 $(len(BRAINSTORM)) 条 / 最终全部 $(len(ALL)) 条：
 ${:for c in ALL}
 - $(c)
 ${:done}
+#)
 ${:else}
-✘ 达到轮次上限（$(MAX_ROUNDS) 轮），仍有 $(COUNT) 条存疑：
+$(#
+✘ 达到轮次上限（$(MAX_ROUNDS) 轮），仍有 $(COUNT) 条存疑。
+全部论点（$(len(ALL)) 条）：
+${:for c in ALL}
+- $(c)
+${:done}
+存疑论点：
 ${:for c in PENDING}
 - $(c)
 ${:done}
+#)
 ${:fi}

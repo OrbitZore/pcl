@@ -8,6 +8,7 @@ from pcl import runtime
 from pcl.bridge import IAgentBridge, PassResult
 from pcl.errors import PclError
 from pcl.runtime import Run, __pcl_freeze, text
+from pcl.runtime import submit as rt_submit
 
 # ---- text()（DSL §10） ------------------------------------------------------
 
@@ -227,3 +228,19 @@ def test_note_standalone_goes_to_output():
     with r:
         runtime.note("独立注记")
     assert r.output == "独立注记"
+
+
+def test_submit_auto_wrap_flat_dict():
+    """唯一授权名 + agent 平铺写 dict → 自动包装（不再 R406）。"""
+    b = _CountingBridge(reply="ok", writes={"all": [1, 2], "pending": [3]})
+    with _run_with(b):
+        r = rt_submit("p", {}, ("RESULT",))
+    assert r.writes == {"RESULT": {"all": [1, 2], "pending": [3]}}
+
+
+def test_submit_mixed_names_still_r406():
+    """部分匹配 + 部分不匹配 → 仍报 R406（混合意图不自动包装）。"""
+    b = _CountingBridge(reply="ok", writes={"RESULT": {"a": 1}, "other": 2})
+    with _run_with(b):
+        with pytest.raises(PclError, match="R406"):
+            rt_submit("p", {}, ("RESULT",))
