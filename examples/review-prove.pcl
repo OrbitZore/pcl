@@ -20,15 +20,16 @@ ${:while ROUND < MAX_ROUNDS}
     ${ROUND = ROUND + 1}
     ${RESULT = {}}
     ${:new}
-    ${:pass :read ROUND :write RESULT}
-    你是严谨的审查员。请对下述主题的正向与反向观点逐条审查、自评：
+    ${:pass :write RESULT}
+    你是严谨的审查员。请对下述全部观点逐条审查、自评：
     - 标注【可信】（常识/公理/可直接验证）或【存疑】（需证据或推导）；
-    - 对存疑观点就地给出证明（推理、例子或引理），证明后重新自评；
+    - 对每条存疑观点就地给出证明（推理、例子或引理），证明后重新自评；
     - 最终调用 pcl_write 把结果写入 RESULT（一个 JSON 对象）：
-      {"all": [所有观点], "pending": [仍存疑的观点（字符串数组，可为空）]}
+      {"all": [审查后的全部观点], "pending": [仍存疑的观点（字符串数组，可为空）]}
 
-    主题：$(TOPIC)
-    上轮仍存疑（请优先证明）：
+    待审查观点（原始发散 $(len(BRAINSTORM)) 条）：
+    $(json.dumps(BRAINSTORM, ensure_ascii=False))
+
     $((json.dumps(PENDING, ensure_ascii=False) + "\n") if PENDING else "")
     当前轮次：第 $(ROUND) 轮
     ${ALL = RESULT.get("all") or BRAINSTORM}
