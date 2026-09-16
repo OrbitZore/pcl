@@ -17,29 +17,38 @@ PCL 将 `.pcl` 模板编译为可读的 Python 源码并在同一解释器中执
 
 首个适配的 agent 是 [pi](https://github.com/earendil-works/pi-coding-agent)：正向模式拉起 `pi --mode rpc` 完成 pass 交互与上下文管理；嵌入模式在 pi 会话内经 `/pcl` 命令族直接执行。
 
-/goal 式目标达成循环（同其他 agent 的 /goal 功能：单一上下文、完整历史、达成即停）：
+/goal 式目标达成循环（同其他 agent 的 /goal 功能：每个 pass 经 :new 开新上下文，因此 prompt 必须自包含——目标 + 累积行动历史 + 轮次）：
 
 ```text
 ${ROUND = 0}
 ${DONE = False}
 ${W = ""}
+${HISTORY = ""}
 ${MAX = 100}
-
-$(@
-任务目标：$prompt
-每轮两步：1. 执行推进 2. 检查是否达成。最多 ${MAX} 轮。
-@)
 
 ${:while ROUND < MAX}
     ${ROUND = ROUND + 1}
 
-    ${:pass :read ROUND :write W}
-    执行者（第 $(ROUND) 轮）：采取行动推进目标。
-    调用 pcl_write 写入：{"W": "行动摘要"}
+    ${:new}
+    ${:pass :write W}
+    执行者（第 $(ROUND)/$(MAX) 轮）。新上下文——所需信息如下。
+    任务目标：$prompt
+    已有行动：
+    $(HISTORY if HISTORY else "（无——第 1 轮）")
+    采取下一步行动，然后只调用一次 pcl_write 写入：
+    {"W": "行动摘要"}
 
-    ${:pass :read ROUND :write W}
-    检查者：上轮行动为「$(W)」。判断目标是否已达成。
-    调用 pcl_write 写入：{"W": {"done": true/false, "note": "理由"}}
+    ${LAST_ACTION = W if isinstance(W, str) else str(W)}
+    ${HISTORY = HISTORY + f"{ROUND}. {LAST_ACTION}\n"}
+
+    ${:new}
+    ${:pass :write W}
+    检查者（第 $(ROUND)/$(MAX) 轮）。新上下文——依以下证据判断。
+    任务目标：$prompt
+    已有行动：
+    $(HISTORY)
+    只调用一次 pcl_write 写入：
+    {"W": {"done": true/false, "note": "理由"}}
 
     ${:# :if 条件在写回之后求值——W 即 Pass 2 的结果}
     ${:if isinstance(W, dict) and W.get("done")}

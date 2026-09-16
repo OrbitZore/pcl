@@ -1,33 +1,40 @@
 #!/usr/bin/env pcl
 ${:# /goal-style goal-achievement loop: two passes per round (act + check), break when done}
-${:# Like the /goal feature in other agents: single context (no :new), agent keeps full history}
+${:# Each pass runs in a fresh context (:new) — so every prompt is self-contained:}
+${:# goal + accumulated action history + round number}
 ${ROUND = 0}
 ${DONE = False}
 ${W = ""}
+${HISTORY = ""}
 ${MAX = 100}
-
-$(@
-Task goal: $prompt
-Each round has two steps: 1) act to progress 2) check if done. Max ${MAX} rounds.
-@)
 
 ${:while ROUND < MAX}
     ${ROUND = ROUND + 1}
 
-    ${:# Pass 1: act — write back an action summary (string)}
-    ${:pass :read ROUND :write W}
-    Executor (round $(ROUND)/$(MAX)): take action toward the goal, or consolidate existing progress.
-    When done, call pcl_write exactly once with:
+    ${:# Pass 1: act — fresh context, self-contained prompt}
+    ${:new}
+    ${:pass :write W}
+    Executor (round $(ROUND)/$(MAX)). You run in a fresh context — everything you need is below.
+    Task goal: $prompt
+    Actions so far:
+    $(HISTORY if HISTORY else "(none yet — this is round 1)")
+    Take the next action toward the goal, then call pcl_write exactly once with:
     {"W": "one-line action summary"}
 
-    ${:# Pass 2: check — write back {"done": bool, "note": str}}
-    ${:pass :read ROUND :write W}
-    Inspector (round $(ROUND)/$(MAX)): last action was "$(W if isinstance(W, str) else str(W))".
-    Judge whether the task goal has been achieved.
-    Call pcl_write exactly once with:
+    ${LAST_ACTION = W if isinstance(W, str) else str(W)}
+    ${HISTORY = HISTORY + f"{ROUND}. {LAST_ACTION}\n"}
+
+    ${:# Pass 2: check — fresh context, self-contained prompt}
+    ${:new}
+    ${:pass :write W}
+    Inspector (round $(ROUND)/$(MAX)). You run in a fresh context — judge from the evidence below.
+    Task goal: $prompt
+    Actions so far:
+    $(HISTORY)
+    Has the goal been achieved? Call pcl_write exactly once with:
     {"W": {"done": true/false, "note": "one-line verdict"}}
 
-    ${:# Note: the :if condition evaluates after pass writeback — W is Pass 2's result}
+    ${:# the :if condition evaluates after writeback — W is Pass 2's result}
     ${:if isinstance(W, dict) and W.get("done")}
         ${DONE = True}
         ${:break}

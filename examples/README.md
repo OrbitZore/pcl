@@ -13,7 +13,7 @@
 | [context-session.pcl](context-session.pcl) | 上下文接续 | `:save`/`:new`/`:load` 往返、会话记忆验证 |
 | [use-library.pcl](use-library.pcl) + [greetlib.pcl](greetlib.pcl) | 库复用 | `.pcl` 间 `import`、加载层（import 永不触发 agent）、模板函数跨文件调用 |
 | [hello.pcl](hello.pcl) | 可执行脚本 | shebang `#!/usr/bin/env pcl` + `chmod +x` → `./hello.pcl "主题"` 直执行 |
-| [goal-loop.pcl](goal-loop.pcl) | **Goal-achievement loop** (like /goal in other agents) | Two passes per round (act + check) in a single context (no `:new`), break when done; `$(# … #)` note output |
+| [goal-loop.pcl](goal-loop.pcl) | **Goal-achievement loop** (like /goal in other agents) | Two passes per round (act + check), each in a fresh context (`:new`) with a self-contained prompt (goal + history), break when done |
 
 ## 快速开始
 

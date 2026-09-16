@@ -56,4 +56,4 @@ Demonstrates: `#!/usr/bin/env pcl` + `chmod +x` for direct execution.
 ./goal-loop.pcl "Create a file named hello.txt with content Hello PCL"
 ```
 
-Like the `/goal` feature in other agents: single context (no `:new`), agent keeps full history. Two passes per round (act + check); the `:if` condition evaluates after pass writeback, so `W` is the inspector's result — break when done. Demonstrates `:while` + `:break`, `$(# … #)` note output, `$(@ … @)` context injection.
+Like the `/goal` feature in other agents: every pass (act / check) runs in a fresh context (`:new`), so each prompt is self-contained — task goal, accumulated action history, round number. The `:if` condition evaluates after pass writeback, so `W` is the inspector's result — break when done. Demonstrates `:new`, `:while` + `:break`, `$(# … #)` note output.
