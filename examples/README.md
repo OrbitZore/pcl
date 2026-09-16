@@ -37,15 +37,21 @@ pcl run context-session.pcl
 pcl gen review-prove.pcl
 ```
 
-## 可执行脚本
+## 直执行
 
-任何 `.pcl` 加 shebang 并赋执行权即可像 shell 脚本一样直接运行：
+全部示例已加 shebang（`#!/usr/bin/env pcl`）并赋执行权（`+x`），可直接运行：
 
 ```bash
-chmod +x hello.pcl
-./hello.pcl "量子纠缠"          # 等价 pcl run hello.pcl "量子纠缠"
-./hello.pcl --agent null        # 后续参数透传
+./demo.pcl "为什么天空是蓝色的"
+./review-prove.pcl "高铁为什么不能用有砟轨道" --trace
+./plan-review.pcl "为 10 人团队制定一次季度技术分享会方案"
+./context-session.pcl
+./data-analysis.pcl
+./use-library.pcl --agent null       # 纯模板（无 LLM）
+./hello.pcl "量子纠缠"
 ```
+
+参数透传：`./script.pcl [PROMPT…] [选项…]` 等价 `pcl run script.pcl [PROMPT…] [选项…]`。
 
 ## 提示
 

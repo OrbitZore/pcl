@@ -1,3 +1,4 @@
+#!/usr/bin/env pcl
 ${:# 单轮自评}
 ${SCORE = 0}
 

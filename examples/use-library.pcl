@@ -1,3 +1,4 @@
+#!/usr/bin/env pcl
 ${:# 场景：库复用——.pcl 间 import（与 Python 互操作同机制）}
 ${import greetlib}
 调用共享库函数：

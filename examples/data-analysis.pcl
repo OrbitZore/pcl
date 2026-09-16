@@ -1,3 +1,4 @@
+#!/usr/bin/env pcl
 ${import statistics}
 
 ${:# 场景：结构化数据经 :read 下发——agent 按需 pcl_read 拉取，不拼进 prompt}
