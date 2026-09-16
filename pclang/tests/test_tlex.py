@@ -256,27 +256,27 @@ def test_note_closure():
 
 def test_extended_delimiter_note():
     """$(end# 内容含 #) 不冲突 end#)。"""
-    ts = toks("$(end# 注记含 #) 字符 end#)\n尾\n")
+    ts = toks("$(end# 注记含 #) 字符 #end)\n尾\n")
     assert any(isinstance(t, NoteTok) for t in ts)
     assert texts("尾\n") == ["尾\n"]
 
 
 def test_extended_delimiter_context():
     """$(@raw 内容含 @) 不冲突 @raw)。"""
-    ts = toks("$(@raw\n上下文含 @) 和 #)\n@raw)\n尾\n")
+    ts = toks("$(@raw\n上下文含 @) 和 #)\n#raw)\n尾\n")
     assert any(isinstance(t, ContextTok) for t in ts)
     assert texts("尾\n") == ["尾\n"]
 
 
 def test_extended_delimiter_with_interp():
     """扩展定界符内支持 $() 插值。"""
-    ts = toks("$(tag# 值：$(42) tag#)\n")
+    ts = toks("$(tag# 值：$(42) #tag)\n")
     assert isinstance(ts[0], NoteTok)
     assert any(isinstance(t, InterpTok) for t in ts[0].tokens)
 
 
 def test_extended_delimiter_fallback_to_expr():
-    """$(foo#bar) 无匹配闭合 foo#) → 回落为 Python 表达式（含注释 → L101）。"""
+    """$(foo#bar) 无匹配闭合 #foo) → 回落为 Python 表达式（含注释 → L101）。"""
     # foo#bar 不是合法 Python（# 后是注释），tokenize 会报错或视为表达式
     # 但 $(x) 正常表达式不受影响
     ts = toks("$(42)\n")

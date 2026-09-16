@@ -48,8 +48,8 @@ import { SessionManager } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 // ---- pass 登记（机器子命令 + 工具共享） ---------------------------------
@@ -691,6 +691,64 @@ function usage(ctx: ExtensionCommandContext): void {
   ].join("\n"), "info");
 }
 
+// ---- ~/.pcl/bin/ 自动命令注册 ------------------------------------------------
+
+function registerBinCommands(pi: ExtensionAPI): void {
+  const binDir = join(homedir(), ".pcl", "bin");
+  if (!existsSync(binDir)) return;
+
+  function isExecutable(p: string): boolean {
+    try {
+      return (statSync(p).mode & 0o111) !== 0;
+    } catch {
+      return false;
+    }
+  }
+
+  function scan(dir: string, prefix: string): void {
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) {
+        scan(full, prefix + e.name + "-");
+      } else if (e.isFile() && isExecutable(full)) {
+        const cmdName = "pcl-" + prefix + e.name;
+        const relPath = prefix + e.name;
+        pi.registerCommand(cmdName, {
+          description: `~/.pcl/bin/${relPath}`,
+          handler: async (args: string, ctx: ExtensionCommandContext) => {
+            const proc = spawn(full, args.trim().split(/\s+/).filter(Boolean), {
+              stdio: ["ignore", "pipe", "pipe"],
+            });
+            let out = "", err = "";
+            proc.stdout?.setEncoding("utf-8");
+            proc.stdout?.on("data", (c: string) => (out += c));
+            proc.stderr?.setEncoding("utf-8");
+            proc.stderr?.on("data", (c: string) => (err += c));
+            const code = await new Promise<number | null>((res) => {
+              proc.on("close", (c) => res(c));
+              proc.on("error", () => res(null));
+            });
+            const text = (code === 0 ? out : out + (err ? "\n" + err : "")).trim();
+            if (text) {
+              appendResult(pi, `${cmdName}（退出码 ${code ?? "?"}）`,
+                           text.split("\n"));
+            }
+            ctx.ui.notify(`${cmdName} ${code === 0 ? "完成" : `失败（${code ?? "?"}）`}`,
+                          code === 0 ? "info" : "error");
+          },
+        });
+      }
+    }
+  }
+  scan(binDir, "");
+}
+
 // ---- 扩展入口 ---------------------------------------------------------------
 
 export default function (pi: ExtensionAPI): void {
@@ -703,6 +761,8 @@ export default function (pi: ExtensionAPI): void {
     const text = String(entry?.data?.text ?? "");
     return new Text(`▌ ${text}`, 1, 0);
   });
+
+  registerBinCommands(pi);
 
   pi.registerEntryRenderer("pcl-run-output", (entry: any, options: any) => {
     const d = entry?.data ?? {};
