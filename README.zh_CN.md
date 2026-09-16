@@ -38,8 +38,7 @@ ${:while ROUND < MAX}
     采取下一步行动，然后只调用一次 pcl_write 写入：
     {"W": "行动摘要"}
 
-    ${LAST_ACTION = W if isinstance(W, str) else str(W)}
-    ${HISTORY = HISTORY + f"{ROUND}. {LAST_ACTION}\n"}
+    ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
 
     ${:new}
     ${:pass :write W}
