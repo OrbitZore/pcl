@@ -24,9 +24,16 @@ from .errors import PclCompileError
 
 def compile_source(src: str, filename: str) -> pygen.GenResult:
     """模板源文本 → 生成源（GenResult）；编译期错误以 PclCompileError 抛出。"""
-    tokens = tlex.tokenize(src, filename)
-    nodes = tparse.parse(tokens, filename)
-    gen = pygen.generate(nodes, filename, version=__version__)
+    try:
+        tokens = tlex.tokenize(src, filename)
+        nodes = tparse.parse(tokens, filename)
+        gen = pygen.generate(nodes, filename, version=__version__)
+    except RecursionError:
+        # 深嵌套（未闭合 :if 链、病态表达式）——干净失败而非泄漏（模糊测试实测）
+        raise PclCompileError(
+            "C310", "模板或内嵌代码嵌套过深",
+            file=filename, line=1, col=1,
+        ) from None
     # 生成源语法检查（C310，映射行号后报告）
     try:
         compile(gen.source, gen.display_name, "exec")
@@ -36,6 +43,11 @@ def compile_source(src: str, filename: str) -> pygen.GenResult:
         raise PclCompileError(
             "C310", f"生成代码未通过 Python 编译：{exc.msg}（生成源第 {lineno} 行）",
             file=filename, line=tpl or 1, col=1,
+        ) from None
+    except RecursionError:
+        raise PclCompileError(
+            "C310", "生成代码嵌套过深（编译器递归上限）",
+            file=filename, line=1, col=1,
         ) from None
     return gen
 

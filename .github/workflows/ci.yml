@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # DESIGN §12：Python 3.10–3.14 × Linux/macOS
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    defaults:
+      run:
+        working-directory: pclang
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 安装（含 dev 依赖）
+        run: python -m pip install -e ".[dev]"
+      - name: Lint（ruff）
+        run: ruff check src tests
+      - name: 测试（pytest）
+        # smoke_pi 标记在无 pi 二进制的环境自动跳过；模糊测试默认 1500 轮
+        run: python -m pytest -q
+
+  build:
+    name: build (sdist + wheel)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 构建
+        run: python -m pip install build && python -m build
+        working-directory: pclang
+      - name: 干净环境安装冒烟
+        run: |
+          python -m venv /tmp/fresh
+          /tmp/fresh/bin/python -m pip install pclang/dist/*.whl
+          /tmp/fresh/bin/pcl version
+          /tmp/fresh/bin/pcl check tests/data/demo.pcl --cache none
+        working-directory: pclang

@@ -339,9 +339,12 @@ class _Scanner:
                             return (self._map_back(tok.start[0], tok.start[1],
                                                    row0, col0), saw_nl)
                         # 深度 0 的另一种闭合符：交由 Python 语法检查报错（C310）
-        except (TokenError, IndentationError, SyntaxError) as exc:
+        except (TokenError, IndentationError, SyntaxError, ValueError,
+                RecursionError) as exc:
+            # ValueError 含 UnicodeDecodeError（C tokenizer 对病态输入的
+            # 再解码失败——模糊测试实测）；RecursionError 为嵌套过深兜底
             raise PclCompileError(
-                "L101", f"词法扫描失败：{exc}",
+                "L101", f"词法扫描失败：{type(exc).__name__}: {exc}",
                 file=self.file, line=self.rowcol(off)[0], col=self.rowcol(off)[1] + 1,
             ) from None
         raise PclCompileError(

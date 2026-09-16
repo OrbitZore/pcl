@@ -254,10 +254,14 @@ def _type_err(path, key, want, got):
                          file=path)
 
 
-def _check_layer(data: dict, path: Path, layer: str, *, strict: bool) -> dict:
-    """校验单层文件：未知键（警告/严格报错）+ 类型/取值检查。返回规范化后的
-    扁平键值（dotted → 已按该文件基准展开路径的值）。"""
+def _check_layer(data: dict, path: Path, layer: str, *, strict: bool):
+    """校验单层文件：未知键（警告/严格报错）+ 类型/取值检查。
+
+    返回 (flat, raw)：flat 为按该文件基准展开路径后的扁平键值；
+    raw 保留原始值（信任模型的相对性判定用，免重读文件）。
+    """
     flat: dict = {}
+    raw: dict = {}
 
     def fail(msg, line=1, col=1):
         raise SettingsError(msg, file=path, line=line, col=col)
@@ -320,6 +324,7 @@ def _check_layer(data: dict, path: Path, layer: str, *, strict: bool) -> dict:
                     raise _type_err(path, dotted, "路径字符串或 null",
                                     type(sv).__name__)
             flat[dotted] = sv
+            raw[dotted] = sv
 
     # 路径展开（以该文件所在目录为基准，§2）
     base = path.parent
@@ -332,7 +337,7 @@ def _check_layer(data: dict, path: Path, layer: str, *, strict: bool) -> dict:
     if "pi.bin" in flat and os.sep in flat["pi.bin"]:
         # 仅含路径分隔符时按文件基准展开；裸名（如 "pi"）交 PATH 解析
         flat["pi.bin"] = _resolve_path(flat["pi.bin"], base)
-    return flat
+    return flat, raw
 
 
 def _resolve_path(value: str, base: Path) -> str:
@@ -342,40 +347,25 @@ def _resolve_path(value: str, base: Path) -> str:
     return str(p)
 
 
-def _check_trust(flat: dict, path: Path, layer: str):
+def _check_trust(raw: dict, flat: dict, path: Path, layer: str):
     """§3.5 信任模型：项目级不得含执行面键；cache.dir 不得逃逸。"""
     if layer != "project":
         return
     for dotted in _USER_ONLY:
-        if dotted in flat:
+        if dotted in raw:
             raise SettingsError(
                 f"项目级设置不得包含执行面键 {dotted!r}"
                 f"（仅用户级可用；请移至用户级设置）", file=path)
-    cd = flat.get("cache.dir")
+    cd = raw.get("cache.dir")
     if cd is not None:
-        raw = _raw_cache_dir(path)
-        if raw is not None and (Path(raw).is_absolute() or ".." in Path(raw).parts):
+        if Path(cd).is_absolute() or ".." in Path(cd).parts:
             raise SettingsError(
                 "项目级 cache.dir 须为相对路径", file=path)
         base = path.parent.resolve()
-        target = Path(cd).resolve()
+        target = Path(flat.get("cache.dir", cd)).resolve()
         if not target.is_relative_to(base):
             raise SettingsError(
                 f"项目级 cache.dir 逃逸出项目目录：{cd}", file=path)
-
-
-def _raw_cache_dir(path: Path):
-    """重读文件取原始 cache.dir（未展开）——用于相对性判定。"""
-    try:
-        data = _load_jsonc(path)
-    except SettingsError:
-        return None
-    cd = data.get("cache")
-    if isinstance(cd, dict):
-        v = cd.get("dir")
-        if isinstance(v, str):
-            return v
-    return None
 
 
 def resolve_settings(entry: Path | str | None = None, *,
@@ -395,7 +385,7 @@ def resolve_settings(entry: Path | str | None = None, *,
         # strict 只看用户级（§7：用户级开关）
         strict = bool(data.get("strict")) if isinstance(data.get("strict"), bool) \
             else False
-        user_flat = _check_layer(data, user_path, "user", strict=strict)
+        user_flat, user_raw = _check_layer(data, user_path, "user", strict=strict)
         sources.append(str(user_path))
         user_label = f"user:{user_path}"
     elif redirected:
@@ -407,8 +397,9 @@ def resolve_settings(entry: Path | str | None = None, *,
     proj_label = None
     if proj_path is not None and proj_path.is_file():
         data = _load_jsonc(proj_path)
-        proj_flat = _check_layer(data, proj_path, "project", strict=strict)
-        _check_trust(proj_flat, proj_path, "project")
+        proj_flat, proj_raw = _check_layer(data, proj_path, "project",
+                                           strict=strict)
+        _check_trust(proj_raw, proj_flat, proj_path, "project")
         sources.append(str(proj_path))
         proj_label = f"project:{proj_path}"
 

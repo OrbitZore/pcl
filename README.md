@@ -47,13 +47,14 @@ uv venv && uv pip install -e . pytest ruff   # Python ≥3.10，零运行时依�
     --agent pi --connector-path ../pcl-connector/index.ts
 ```
 
-里程碑：M0 ✅（编译器+gen/check+黄金快照）、M1 ✅（runtime+Null/Script 桥+e2e+importer）、M2 ✅（PiBridge+pcl-connector+上下文三指令+冒烟）、M3 ✅（嵌入模式 /pcl run+协议代理+stdout 独占）、M4 ✅（嵌入上下文接续：模块级桥/接管规则/auto-follow/孤儿路径/跨 cwd 预检 A522/L1 降级 A523）。M2–M4 冒烟实测记录见 DESIGN §16。
+里程碑：M0–M4 ✅（v0.1 全量）＋ v0.2 设置文件/模糊测试/CI/发布物料。M2–M4 冒烟实测记录见 DESIGN §16；本地验证矩阵 Python 3.10–3.14。
 
 ## 文档
 
 - [docs/DSL.md](docs/DSL.md) — 语言规范 v0.1（已终审）
 - [docs/DESIGN.md](docs/DESIGN.md) — 实现设计 v0.1（已终审；实现期实测修正见 §16）
-- [docs/SETTINGS.md](docs/SETTINGS.md) — 设置文件方案（用户级/项目级；提案）
+- [docs/SETTINGS.md](docs/SETTINGS.md) — 设置文件方案（用户级/项目级；已实现）
+- [CHANGELOG.md](CHANGELOG.md) · [LICENSE](LICENSE)（MIT）
 
 ## 一分钟看懂
 

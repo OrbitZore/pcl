@@ -79,6 +79,8 @@ def build_parser() -> _Parser:
                      help="可选 .pcl 入口（用于项目级设置发现）")
     cfg.add_argument("--no-project-config", action="store_true")
     cfg.add_argument("--defaults", action="store_true", help="仅打印内置默认")
+    cfg.add_argument("--show-origin", action="store_true",
+                     help="显示各键来源（默认已开启；git config 风格旗标兼容）")
 
     sub.add_parser("version", help="版本")
     return p
