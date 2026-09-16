@@ -139,3 +139,21 @@ def test_install_importer_idempotent():
     install_importer()
     n = sum(isinstance(f, _PclMetaFinder) for f in sys.meta_path)
     assert n == 1
+
+
+def test_run_program_installs_importer_subprocess(tmp_path):
+    """独立进程回归：pcl run 内建 importer（此前靠测试进程内泄漏的 hook 通过）。"""
+    import subprocess
+
+    pcl_bin = Path(__file__).resolve().parent.parent / ".venv" / "bin" / "pcl"
+    if not pcl_bin.exists():  # pragma: no cover
+        pytest.skip("未找到 pcl 可执行")
+    write(tmp_path / "helpers.pcl",
+          '${H = "来自共享库"}\n${:function val}\n${:return H}\n${:endfunction}\n')
+    write(tmp_path / "main.pcl", "${import helpers}\nR=$(helpers.val())\n")
+    proc = subprocess.run(
+        [str(pcl_bin), "run", str(tmp_path / "main.pcl"), "--agent", "null",
+         "--cache", "none"],
+        capture_output=True, text=True, timeout=120)
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout == "R=来自共享库\n"

@@ -328,7 +328,12 @@ def run_program(path, prompt: str = "", *, agent: str = "pi",
 
     from .bridge import make_bridge as _make_bridge
     from .importer import import_from_path as _import_from_path
+    from .importer import install_importer as _install_importer
     from .tparse import RUNTIME_RESERVED as _RESERVED
+
+    # pcl run 内建 importer hook（DESIGN §3）：`${import helpers}` 等
+    # DSL→DSL 导入经 sys.path[0]（源目录）解析——不依赖宿主预先 install_importer
+    _install_importer()
 
     pcl_path = _Path(path)
     if not pcl_path.exists():

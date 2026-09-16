@@ -1,0 +1,33 @@
+${import json}
+
+${:# 场景：方案制作 → 自评循环——10 分制直至 10 分（或达轮次上限）}
+${ROUND = 0}
+${SCORE = 0}
+${MAX_ROUNDS = 5}
+
+${:function draft}
+    ${STATE = 0}
+    ${:pass :read SCORE :write STATE}
+请就下述主题制作一份简明方案，包含四节：目标（可验收）、步骤（3–5 步）、风险与对策（2–3 条）、验收标准。
+写完后切换到最挑剔的评审人视角自评（0–10 整数）：
+- 10 分标准：目标可量化验收、步骤无缺环、每条风险都有对策、全文无空话套话；
+- 不足 10 分时，立即在同一轮内修订方案并重新自评，可多轮内联迭代；
+- 最终把最后一次的分数（单个整数）调用 pcl_write 写入 STATE。
+
+主题：$prompt
+外部轮次：第 $(ROUND) 轮；上一轮外部得分：$(SCORE)
+    ${:return STATE}
+${:endfunction}
+
+${:while SCORE < 10 and ROUND < MAX_ROUNDS}
+    ${ROUND = ROUND + 1}
+    ${STATE = draft(prompt)}
+    ${SCORE = STATE if isinstance(STATE, int) and not isinstance(STATE, bool) and 0 <= STATE <= 10 else 0}
+本轮得分：$(SCORE)/10
+${:done}
+
+${:if SCORE >= 10}
+✔ 方案在第 $(ROUND) 轮达到 $(SCORE)/10 分。
+${:else}
+✘ 经 $(ROUND) 轮未达 10 分（当前 $(SCORE)/10，上限 $(MAX_ROUNDS) 轮）。
+${:fi}
