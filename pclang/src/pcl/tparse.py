@@ -52,10 +52,11 @@ class Text(Node):
 
 @dataclass
 class Note(Node):
-    """注记 ``$(# …)``：独立运行渲染进输出文档；嵌入经桥接层进会话 custom
-    条目；均不进 LLM 上下文。"""
+    """注记 ``$(# … #)``：body 为完整模板体（支持插值/指令/嵌套）。
+    渲染结果经 note() 下发——独立运行进输出文档；嵌入进会话 custom 条目；
+    均不进 LLM 上下文。"""
 
-    text: str = ""
+    body: list = field(default_factory=list)
 
 
 @dataclass
@@ -254,7 +255,10 @@ class _Parser:
                 i += 1
                 continue
             if isinstance(t, NoteTok):
-                nodes.append(Note(t.line, t.col, t.text))
+                sub = _Parser(t.tokens, self.file if hasattr(self, "file") else "?")
+                body, j = sub.parse_seq(0, top=False, in_function=False,
+                                        in_loop=False)
+                nodes.append(Note(t.line, t.col, body))
                 i += 1
                 continue
             if isinstance(t, InterpTok):

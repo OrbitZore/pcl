@@ -244,11 +244,15 @@ class _Emitter:
         if isinstance(nd, Text):
             self.append_const(nd.text, nd.line)
         elif isinstance(nd, Note):
-            # 注记：发起型保序（先冲刷合并段）——独立运行渲染进输出文档，
-            # 嵌入运行经桥接层 note 命令进会话 custom 条目（不进 LLM 上下文）
+            # 注记：body 为完整模板体——push_sink 渲染后 pop_sink 取文本，
+            # 经 note() 下发（独立→输出文档；嵌入→会话 custom 条目）
             self.flush()
-            self.uses.add("note")
-            self.w(f"note({pystr(nd.text)})", nd.line)
+            self.uses.update(("push_sink", "pop_sink", "note"))
+            self.w("push_sink()", nd.line)
+            self.emit_children(nd.body)
+            self.flush()
+            self.w("__pcl_note = pop_sink()", nd.line)
+            self.w("note(__pcl_note)", nd.line)
         elif isinstance(nd, Interp):
             self.emit_interp(nd)
         elif isinstance(nd, If):

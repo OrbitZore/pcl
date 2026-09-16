@@ -87,23 +87,22 @@ class DirTok:
 
 
 class NoteTok:
-    """注记模板 ``$(# …)``：内容逐字（圆括号配平、单行）。
-
-    渲染为注记——正向/独立运行进输出文档（保序）；嵌入运行经桥接层
-    ``note`` 命令由连接器以 custom entry（pcl-note）附加进会话流；
-    两种形态均不进入 LLM 上下文。
+    """注记模板 ``$(# … #)``：内容为**完整模板体**（递归 tokenize，支持
+    ``${}``/``$()``/指令/裸糖）。渲染结果经 ``note()`` 下发——正向/独立
+    运行进输出文档（保序）；嵌入运行经桥接层 ``note`` 命令由连接器以
+    custom entry 附加进会话流；均不进 LLM 上下文。
     """
 
-    __slots__ = ("text", "line", "col")
+    __slots__ = ("tokens", "line", "col")
 
-    def __init__(self, text: str, line: int, col: int):
-        self.text = text
+    def __init__(self, tokens: list, line: int, col: int):
+        self.tokens = tokens   # 递归 tokenize 的子 token 流
         self.line = line
         self.col = col
 
     @property
     def no_output(self) -> bool:
-        return False   # 注记产生输出（输出文档或会话条目）——独行不消除
+        return False   # 注记产生输出——独行不消除
 
 
 class _NoteItem:
@@ -281,7 +280,7 @@ class _Scanner:
                 # 注释简写 ${# …（≡ ${:# …，行界定）
                 return self._comment(start_off)
         elif src[i + 1] == "(" and content_off < self.n and src[content_off] == "#":
-            # 注记模板 $(# …)：圆括号配平、单行、内容逐字（非 Python 语句）
+            # 注记模板 $(# … #)：内容为完整模板体，闭合 #)
             return self._note(start_off, content_off, row, col)
         closer = "}" if src[i + 1] == "{" else ")"
         form = "{" if closer == "}" else "("
@@ -298,26 +297,24 @@ class _Scanner:
         return closer_off + 1
 
     def _note(self, start_off: int, hash_off: int, row: int, col: int) -> int:
-        """``$(# …)``：手工配平扫描（内容为自然语言，不经 Python tokenizer）。"""
-        depth = 1
-        i = hash_off + 1
-        while i < self.n:
-            c = self.src[i]
-            if c == "\n":
-                break   # 注记单行；跨行即未闭合
-            if c == "(":
-                depth += 1
-            elif c == ")":
-                depth -= 1
-                if depth == 0:
-                    text = self.src[hash_off + 1:i].lstrip(" \t")
-                    self.items.append(_NoteItem(NoteTok(text, row, col + 1)))
-                    return i + 1
-            i += 1
-        raise PclCompileError(
-            "L100", "注记 $(# …) 未闭合（单行、内容圆括号需配平）",
-            file=self.file, line=row, col=col + 1,
-        )
+        """``$(# … #)``：内容为完整模板体（可跨行），闭合符为字面 ``#)``。
+
+        内容递归调用 tokenize() 解析为子 token 流——支持 ${}/$()/指令/
+        裸糖/嵌套注记。"""
+        close = self.src.find("#)", hash_off + 1)
+        if close == -1:
+            raise PclCompileError(
+                "L100", "注记 $(# … #) 未闭合（缺少 #)）",
+                file=self.file, line=row, col=col + 1,
+            )
+        body = self.src[hash_off + 1:close].strip("\n")
+        # 递归 tokenize：内容走完整模板管线（含行消除等）
+        try:
+            sub_tokens = tokenize(body, self.file)
+        except PclCompileError:
+            raise   # 子模板错误原样传播（行号已映射到子模板；可后续做行号偏移）
+        self.items.append(_NoteItem(NoteTok(sub_tokens, row, col + 1)))
+        return close + 2
 
     def _comment(self, start_off: int) -> int:
         """${:# …}：行界定，# 起至行尾整体丢弃（§4.5）。"""

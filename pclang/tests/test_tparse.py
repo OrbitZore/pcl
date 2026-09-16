@@ -167,4 +167,4 @@ def test_empty_blocks():
 
 def test_note_reserved_name():
     assert code("${note = 1}") == "C300"               # note 为第 9 个运行时名
-    compile_source("$(# 合法注记)\n", "t.pcl")
+    compile_source("$(# 合法注记 #)\n", "t.pcl")

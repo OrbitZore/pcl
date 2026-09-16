@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from pcl.errors import PclCompileError
-from pcl.tlex import DirTok, InterpTok, TextTok, tokenize
+from pcl.tlex import DirTok, InterpTok, NoteTok, TextTok, tokenize
 
 
 def toks(src: str):
@@ -216,18 +216,37 @@ def test_comment_shorthand():
     assert err_code("文本 ${# c}") == "C305"          # 前置内容才触发
 
 
+
 def test_note_construct():
-    ts = toks("前 $(# 注 (嵌套)) 后\n")
+    """$(# … #)：内容为完整模板体（递归 tokenize），闭合 #)。"""
+    ts = toks("前 $(# 注 #) 后\n")
     kinds = [type(t).__name__ for t in ts]
     assert kinds == ["TextTok", "NoteTok", "TextTok", "TextTok"]
-    note = ts[1]
-    assert note.text == "注 (嵌套)" and note.no_output is False
-    # 行保留（注记产生输出）+ 换行
+    note_tok = ts[1]
+    assert note_tok.no_output is False
+    assert len(note_tok.tokens) >= 1
+    assert any(isinstance(t, TextTok) and "注" in t.text for t in note_tok.tokens)
     assert ts[-1].text == "\n"
 
 
-def test_note_single_line_and_closure():
-    assert err_code("$(# 跨\n行)") == "L100"          # 单行限制
+def test_note_with_interp_and_control_flow():
+    """注记内 $()/${}/指令正常渲染。"""
+    ts = toks("$(# 分数：$(42) ${:if 1}高${:fi} #)\n")
+    assert isinstance(ts[0], NoteTok)
+    inner = ts[0].tokens
+    assert any(isinstance(t, InterpTok) for t in inner)
+    assert any(isinstance(t, DirTok) and t.verb in ("if", "fi") for t in inner)
+
+
+def test_note_multiline():
+    """$(# 可跨行。"""
+    ts = toks("$(#\n第一行\n第二行 $(x)\n#)\n尾\n")
+    assert any(isinstance(t, NoteTok) for t in ts)
+    assert texts("尾\n") == ["尾\n"]
+
+
+def test_note_closure():
     assert err_code("$(# 未闭合") == "L100"
     # 转义：$$ 产出字面 $，其后为普通文本（不构成注记）
     assert texts("$$(# 不是注记)\n") == ["$(# 不是注记)\n"]
+
