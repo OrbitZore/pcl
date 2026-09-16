@@ -339,6 +339,13 @@ def _drive_tui(steps: list, settle: float = 6.0, poll: str = "退出码",
 
     alive = True
     read_all(settle)
+    # 就绪等待：出现模型行（页脚）且输出静默 1s——过早写入会被 TUI 吞掉
+    ready_deadline = time.time() + 60
+    while time.time() < ready_deadline:
+        read_all(1.0)
+        footer = ("•" in stream) or ("(zai-coding-cn)" in stream)
+        if footer and not read_all(0.2):
+            break
     for step in steps:
         kind = step[0]
         if kind == "sleep":
