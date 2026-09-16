@@ -27,6 +27,7 @@ STRIP_WS = " \t"
 
 # 完整标识符（unicode 感知），用于裸糖 $prompt 的最长匹配
 _IDENT_RE = re.compile(r"[^\W\d]\w*", re.UNICODE)
+_DELIM_MARKER_RE = re.compile(r"(\w+)([#@])")
 
 # 已知指令动词（§6）
 VERBS = frozenset({
@@ -295,11 +296,29 @@ class _Scanner:
             if content_off < self.n and src[content_off] == "#":
                 # 注释简写 ${# …（≡ ${:# …，行界定）
                 return self._comment(start_off)
-        elif src[i + 1] == "(" and content_off < self.n and src[content_off] == "#":
-            # 注记模板 $(# … #)：内容为完整模板体，闭合 #)
-            return self._note(start_off, content_off, row, col)
-        elif src[i + 1] == "(" and content_off < self.n and src[content_off] == "@":
-            return self._context(start_off, content_off, row, col)
+        elif src[i + 1] == "(":
+            if content_off < self.n and src[content_off] == "#":
+                return self._note(start_off, content_off, row, col)
+            if content_off < self.n and src[content_off] == "@":
+                return self._context(start_off, content_off, row, col)
+            # 扩展定界符 $(<delim># … <delim>#) / $(<delim>@ … <delim>@)
+            # —— 同 C++ raw string，防止内容中出现 #) 或 @)
+            m = _DELIM_MARKER_RE.match(src, content_off, content_off + 256)
+            if m and m.group(1):
+                delim, marker = m.group(1), m.group(2)
+                closer_str = delim + marker + ")"
+                end = src.find(closer_str, m.end())
+                if end != -1:
+                    body = src[m.end():end].strip("\n")
+                    try:
+                        sub = tokenize(body, self.file)
+                    except PclCompileError:
+                        raise
+                    if marker == "#":
+                        self.items.append(_NoteItem(NoteTok(sub, row, col + 1)))
+                    else:
+                        self.items.append(_ContextItem(ContextTok(sub, row, col + 1)))
+                    return end + len(closer_str)
         closer = "}" if src[i + 1] == "{" else ")"
         form = "{" if closer == "}" else "("
         closer_off, saw_nl = self._find_closer(content_off, closer)
