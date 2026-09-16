@@ -136,6 +136,42 @@ class ScriptBridge(IAgentBridge):
         self._mint()
 
 
+def make_tracer():
+    """--trace 的 stderr 格式化器：pass 提交 / 思考与文本增量 / pcl_write /
+    轮次结束——长循环期间的可见反馈（文本增量原样流出，思考增量在 TTY 上
+    暗色显示、管道下跳过）。"""
+    import json
+    import sys
+
+    tty = sys.stderr.isatty()
+
+    def trace(ev: dict) -> None:
+        t = ev.get("type")
+        try:
+            if t == "message_update":
+                e = ev.get("assistantMessageEvent") or {}
+                kind, delta = e.get("type"), e.get("delta")
+                if kind == "text_delta" and delta:
+                    sys.stderr.write(delta)
+                    sys.stderr.flush()
+                elif kind == "thinking_delta" and delta and tty:
+                    sys.stderr.write(f"\x1b[2m{delta}\x1b[0m")
+                    sys.stderr.flush()
+            elif t == "pcl_pass_submit":
+                sys.stderr.write(f"[pcl] ⇢ pass 提交（{ev.get('chars', '?')} 字符）\n")
+            elif t == "tool_execution_start" and ev.get("toolName") == "pcl_write":
+                args = ev.get("args") or {}
+                inner = args.get("values", args)
+                sys.stderr.write(f"[pcl] ⇢ pcl_write "
+                                 f"{json.dumps(inner, ensure_ascii=False)}\n")
+            elif t == "agent_settled":
+                sys.stderr.write("[pcl] ⇢ agent 空闲（本轮结束）\n")
+        except Exception:
+            pass
+
+    return trace
+
+
 def make_bridge(agent: str, *, script: str | Path | None = None,
                 pi_bin: str | None = None, connector_path: str | None = None,
                 pi_args: list | None = None, timeout: float | None = None,
@@ -149,17 +185,11 @@ def make_bridge(agent: str, *, script: str | Path | None = None,
         return ScriptBridge(script)
     if agent == "pi":
         from .pibridge import PiBridge
-        tracer = None
-        if trace:
-            import sys
-            tracer = lambda d: sys.stderr.write(d)  # noqa: E731
         return PiBridge(pi_bin=pi_bin or "pi", connector_path=connector_path,
-                        pi_args=pi_args, timeout=timeout or 300.0, trace=tracer)
+                        pi_args=pi_args, timeout=timeout or 300.0,
+                        trace=make_tracer() if trace else None)
     if agent == "embed":
         from .pibridge import PiBridge
-        tracer = None
-        if trace:
-            import sys
-            tracer = lambda d: sys.stderr.write(d)  # noqa: E731
-        return PiBridge(timeout=timeout or 300.0, trace=tracer, embed=True)
+        return PiBridge(timeout=timeout or 300.0,
+                        trace=make_tracer() if trace else None, embed=True)
     raise NotImplementedError(f"未知 agent：{agent!r}")

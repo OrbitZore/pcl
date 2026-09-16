@@ -335,14 +335,19 @@ def test_exit_a503(fake_pi):
         b.close()
 
 
-def test_trace_streaming(fake_pi):
+def test_trace_receives_events(fake_pi):
     seen = []
-    bin_ = fake_pi({"passes": [{"reply": "整段", "partial_delta": "增量"}]})
+    bin_ = fake_pi({"passes": [{"reply": "整段", "partial_delta": "增量",
+                                "writes": {"S": 9}}]})
     b = PiBridge(pi_bin=bin_, timeout=5.0, trace=seen.append)
     b.start()
     try:
-        b.submit("p", {}, ())
-        assert seen == ["增量"]
+        b.submit("p", {}, ("S",))
+        types = [e.get("type") for e in seen]
+        assert "pcl_pass_submit" in types           # 合成：pass 提交
+        assert "message_update" in types            # 流式事件（完整对象）
+        assert "tool_execution_start" in types      # pcl_write 回流
+        assert "agent_settled" in types             # 轮次边界
     finally:
         b.close()
 

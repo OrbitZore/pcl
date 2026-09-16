@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from ._version import __version__
 
@@ -61,7 +62,9 @@ def build_parser() -> _Parser:
     run.add_argument("--timeout", type=float, default=None, metavar="SEC")
     run.add_argument("-o", "--output", dest="output", metavar="FILE",
                      help="只写文件，不再打 stdout")
-    run.add_argument("--trace", action="store_true")
+    run.add_argument("--trace", action="store_true",
+                     help="stderr 流式诊断：pass 提交/思考与文本增量/"
+                          "pcl_write 写回/轮次结束——长循环的可见反馈")
     add_cache_opts(run)
 
     gen = sub.add_parser("gen", help="打印生成的 Python 源")
@@ -190,6 +193,11 @@ def main(argv: list[str] | None = None) -> int:
                 return 1
             sys.stdout.write(_format_config(st, args.defaults))
             return 0
+
+        # 入口文件存在性：用法错（exit 1）而非运行期 R400（exit 2）
+        if not Path(args.file).is_file():
+            sys.stderr.write(f"pcl: 错误：模板文件不存在：{args.file}\n")
+            return 1
 
         # run / gen / check：入口 .pcl 为设置发现基准（SETTINGS §2）
         try:

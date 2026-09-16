@@ -346,6 +346,11 @@ class PiBridge(IAgentBridge):
             settled_before = self._settled_seq
             self._seq += 1
             pass_id = self._seq
+        if self.trace is not None:
+            try:
+                self.trace({"type": "pcl_pass_submit", "chars": len(prompt)})
+            except Exception:
+                pass
         self._send({"id": pass_id, "type": "prompt", "message": message})
         deadline = time.monotonic() + self.timeout
 
@@ -547,6 +552,11 @@ class PiBridge(IAgentBridge):
                         "A501", f"pass 提交期错误（{path or event}）：{obj.get('error')}")
                     self._cond.notify_all()
         elif ftype == "agent_settled":
+            if self.trace is not None:
+                try:
+                    self.trace(obj)
+                except Exception:
+                    pass
             with self._cond:
                 self._settled_seq += 1
                 self._cond.notify_all()
@@ -560,6 +570,11 @@ class PiBridge(IAgentBridge):
                     inner = args.get("values")
                     if isinstance(inner, dict) and set(args) == {"values"}:
                         args = inner
+                    if self.trace is not None:
+                        try:
+                            self.trace(obj)
+                        except Exception:
+                            pass
                     with self._cond:
                         self._pass_writes.update(args)
         elif ftype in ("message_end", "turn_end"):
@@ -571,10 +586,8 @@ class PiBridge(IAgentBridge):
                         self._reply_cache = text
         elif ftype == "message_update":
             if self.trace is not None:
-                ev = obj.get("assistantMessageEvent") or {}
-                if ev.get("type") == "text_delta" and ev.get("delta"):
-                    try:
-                        self.trace(ev["delta"])
-                    except Exception:
-                        pass
+                try:
+                    self.trace(obj)      # 完整事件（格式化器自取增量）
+                except Exception:
+                    pass
         # 其余事件（extension_ui_request 等）：记录/忽略

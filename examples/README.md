@@ -23,8 +23,10 @@ pcl run use-library.pcl --agent null
 pcl run demo.pcl "为什么天空是蓝色的"
 
 # ③ 循环场景（多轮，每轮 1 次 LLM 调用；上限内置）
-pcl run review-prove.pcl "夜间高铁为什么要减速"
-pcl run plan-review.pcl "为 10 人团队制定一次季度技术分享会方案"
+#    回复只在每轮结束时落 stdout——长循环建议开 --trace 看 stderr 实时进度：
+#    pass 提交 / 思考与文本增量（暗色）/ pcl_write 写回 / 轮次结束
+pcl run review-prove.pcl "高铁为什么不能用有砟轨道" --trace
+pcl run plan-review.pcl "为 10 人团队制定一次季度技术分享会方案" --trace
 
 # ④ 数据/上下文
 pcl run data-analysis.pcl
@@ -36,6 +38,7 @@ pcl gen review-prove.pcl
 
 ## 提示
 
-- 循环用例的每轮 agent 回复都会按宏语义落入输出文档（可 `--trace` 观察流式）；
+- **stdout = 输出文档**（文本/插值/每轮回复，轮末才落）；**stderr = 诊断**（错误、
+  `--trace` 实时进度）；退出码 0/1/2/3/130（成功/用法与编译/运行期/桥接/中断）；
 - 跨运行续聊：把 `:save` 得到的 token 存进文件，下次 `${cx = open(...).read().strip()}` + `${:load cx}`（DSL §8 配方）；
 - 全部示例经 `tests/test_examples.py` 编译守护（`pcl check` 等价）。
