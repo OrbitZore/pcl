@@ -45,9 +45,10 @@
 
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { SessionManager } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -548,13 +549,25 @@ function spawnCapture(args: string[]): Promise<{ code: number | null; out: strin
   });
 }
 
-const WIDGET_MAX_LINES = 120;
+/** 入会话流的最大行数（超出截断；完整内容看输出文件）。 */
+const ENTRY_MAX_LINES = 800;
+/** 未展开时的预览行数（展开键查看全部）。 */
+const ENTRY_PREVIEW_LINES = 15;
 
-function presentWidget(ui: any, title: string, lines: string[]) {
-  const body = lines.length > WIDGET_MAX_LINES
-    ? [...lines.slice(0, WIDGET_MAX_LINES), `…（共 ${lines.length} 行，已截断）`]
+/**
+ * 把结果以 custom entry 附加进会话流：不进 LLM 上下文、随对话滚动（无常驻
+ * widget）、随会话持久；TUI 经 registerEntryRenderer 渲染（未展开时预览 +
+ * 截断，展开看全部；RPC/嵌入宿主无渲染也不影响持久化）。
+ */
+function appendResult(pi: ExtensionAPI, title: string, lines: string[],
+                      path?: string) {
+  const capped = lines.length > ENTRY_MAX_LINES
+    ? [...lines.slice(0, ENTRY_MAX_LINES),
+       `…（共 ${lines.length} 行，已截断；完整内容见输出文件）`]
     : lines;
-  ui.setWidget?.("pcl-run", [`--- ${title} ---`, ...body], "aboveEditor");
+  try {
+    pi.appendEntry("pcl-run-output", { title, lines: capped, path });
+  } catch { /* 尽力：呈现失败不影响退出码上报 */ }
 }
 
 async function runEmbedded(ctx: ExtensionCommandContext, tokens: string[]): Promise<void> {
@@ -589,26 +602,25 @@ async function runEmbedded(ctx: ExtensionCommandContext, tokens: string[]): Prom
   try {
     const code = await bridge.done;
     const output = safeRead(outPath);
-    // 运行中可能发生会话替换（:new/:load）：呈现用最新绑定的 ui（旧 ctx 已过期）
+    // 运行中可能发生会话替换（:new/:load）：呈现用最新绑定（旧 ctx 已过期）
     const ui = bridge.ui() ?? ctx.ui;
     if (code === 0) {
-      presentWidget(ui, `pcl run 完成（退出码 0）：${file}`, output.split("\n"));
-      ui.notify(`pcl run 完成（退出码 0）`, "info");
+      appendResult(latestPi!, `pcl run 完成（退出码 0）：${file}`,
+                   output.split("\n"), outPath);
+      ui.notify?.(`pcl run 完成（退出码 0）`, "info");
     } else {
       const tail = bridge.stderr().trim();
-      presentWidget(ui, `pcl run 失败（退出码 ${code ?? "?"}）：${file}`, [
-        ...output.split("\n"),
-        ...(tail ? ["--- stderr 尾部 ---", ...tail.split("\n")] : []),
-      ]);
-      ui.notify(`pcl run 失败（退出码 ${code ?? "?"}）`, "error");
+      appendResult(latestPi!, `pcl run 失败（退出码 ${code ?? "?"}）：${file}`,
+                   [...output.split("\n"),
+                    ...(tail ? ["--- stderr 尾部 ---", ...tail.split("\n")] : [])],
+                   outPath);
+      ui.notify?.(`pcl run 失败（退出码 ${code ?? "?"}）`, "error");
     }
   } finally {
     if (moduleBridge === bridge) moduleBridge = null;
     const ui = bridge.ui() ?? ctx.ui;
     try { ui.setStatus?.("pcl", undefined); } catch { /* 尽力 */ }
-    if (workdir) {
-      try { rmSync(workdir, { recursive: true, force: true }); } catch { /* 尽力 */ }
-    }
+    // tmp 输出文件保留（会话流尾注已给出路径；系统 tmp 自行回收）
   }
 }
 
@@ -629,18 +641,21 @@ function safeRead(path: string): string {
   }
 }
 
-async function passthrough(ctx: ExtensionCommandContext, tokens: string[]): Promise<void> {
+async function passthrough(pi: ExtensionAPI, ctx: ExtensionCommandContext,
+                            tokens: string[]): Promise<void> {
   const { code, out, err } = await spawnCapture(tokens);
-  if (code === 0) {
-    presentWidget(ctx, `pcl ${tokens[0]}（退出码 0）`, out.split("\n"));
-    ctx.ui.notify(`pcl ${tokens[0]} 完成`, "info");
-  } else {
-    presentWidget(ctx, `pcl ${tokens[0]}（退出码 ${code ?? "?"}）`, [
-      ...out.split("\n"),
-      ...(err.trim() ? ["--- stderr 尾部 ---", ...err.trim().split("\n").slice(-15)] : []),
-    ]);
-    ctx.ui.notify(`pcl ${tokens[0]} 失败（退出码 ${code ?? "?"}）`, "error");
+  const lines = [
+    ...out.split("\n"),
+    ...(err.trim() ? ["--- stderr 尾部 ---",
+                     ...err.trim().split("\n").slice(-15)] : []),
+  ];
+  if (tokens[0] === "version") {
+    ctx.ui.notify(out.trim() || `pcl version（退出码 ${code ?? "?"}）`, "info");
+    return;
   }
+  appendResult(pi, `pcl ${tokens[0]}（退出码 ${code ?? "?"}）`, lines);
+  ctx.ui.notify(`pcl ${tokens[0]} ${code === 0 ? "完成" : `失败（退出码 ${code ?? "?"}）`}`,
+                code === 0 ? "info" : "error");
 }
 
 function usage(ctx: ExtensionCommandContext): void {
@@ -659,6 +674,22 @@ function usage(ctx: ExtensionCommandContext): void {
 
 export default function (pi: ExtensionAPI): void {
   latestPi = pi;
+
+  // /pcl run 结果的会话流渲染（custom entry：不进 LLM 上下文；未展开预览，
+  // 展开键查看全部——替代旧常驻 widget）
+  pi.registerEntryRenderer("pcl-run-output", (entry: any, options: any) => {
+    const d = entry?.data ?? {};
+    const lines: string[] = Array.isArray(d.lines) ? d.lines : [];
+    const shown = options?.expanded ? lines : lines.slice(0, ENTRY_PREVIEW_LINES);
+    const body = [
+      ...(d.title ? [`── ${d.title} ──`] : []),
+      ...shown,
+      ...(!options?.expanded && lines.length > ENTRY_PREVIEW_LINES
+        ? [`…（共 ${lines.length} 行，展开查看全部）`] : []),
+      ...(d.path ? [`完整输出：${d.path}`] : []),
+    ].join("\n");
+    return new Text(body, 1, 0);
+  });
 
   pi.registerCommand("pcl", {
     description: "PCL：/pcl run <file.pcl> [PROMPT] — 在当前会话执行 PCL（与 pcl CLI 对齐）",
@@ -680,7 +711,7 @@ export default function (pi: ExtensionAPI): void {
         return runEmbedded(ctx, trimmed.split(/\s+/).slice(1));
       }
       if (sub === "gen" || sub === "check" || sub === "config" || sub === "version") {
-        return passthrough(ctx, trimmed.split(/\s+/));
+        return passthrough(pi, ctx, trimmed.split(/\s+/));
       }
       return usage(ctx);
     },

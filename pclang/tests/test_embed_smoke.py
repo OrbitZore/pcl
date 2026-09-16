@@ -129,7 +129,8 @@ def test_pcl_version_passthrough(tmp_path, monkeypatch):
     with _Session(tmp_path, monkeypatch) as s:
         resp = s.send_command("/pcl version")
         assert resp is not None and resp.get("success")
-        assert any("完成" in n for n in s.notifies)
+        # version 直通：notify 即版本文本（一行，无需入会话流）
+        assert any(n.startswith("pcl ") for n in s.notifies)
 
 
 @requires_pi
