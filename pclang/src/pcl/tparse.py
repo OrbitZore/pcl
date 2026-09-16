@@ -508,7 +508,15 @@ class _Parser:
                 i += 1
                 continue
             if isinstance(t, NoteTok):
-                body.append(Note(t.line, t.col, t.text))
+                sub = _Parser(t.tokens, self.file if hasattr(self, "file") else "?")
+                note_body, _ = sub.parse_seq(0, top=False, in_function=False, in_loop=False)
+                body.append(Note(t.line, t.col, note_body))
+                i += 1
+                continue
+            if isinstance(t, ContextTok):
+                sub = _Parser(t.tokens, self.file if hasattr(self, "file") else "?")
+                ctx_body, _ = sub.parse_seq(0, top=False, in_function=False, in_loop=False)
+                body.append(Context(t.line, t.col, ctx_body))
                 i += 1
                 continue
             break

@@ -18,16 +18,35 @@ PCL compiles `.pcl` templates into readable Python source and executes them in t
 The first supported agent is [pi](https://github.com/earendil-works/pi-coding-agent): forward mode spawns `pi --mode rpc` for pass interaction and context management; embedded mode runs PCL directly inside a pi session via `/pcl` commands.
 
 ```text
-${SCORE = 0}
+${ROUND = 0}
+${DONE = False}
+${MAX = 100}
 
-${:pass :write SCORE}
-Write a short paragraph about: $prompt
-Then rate your quality (0-10) and write it to SCORE.
+$(@
+Goal: $prompt
+Each round: 1) act to progress 2) check if done. Max ${MAX} rounds.
+@)
 
-${:if SCORE >= 7}
-Quality passed.
-${:else}
-Score too low — rewrite and rescore.
+${:while ROUND < MAX}
+    ${ROUND = ROUND + 1}
+
+    ${:new}
+    ${:pass :read ROUND :write W}
+    Act toward the goal (round $(ROUND)). Write to W: {"W": "action summary"}
+
+    ${:new}
+    ${:pass :read ROUND :write W}
+    Check if goal achieved. Write to W: {"W": {"done": true/false, "note": "reason"}}
+
+    ${:if 1}
+    ${DONE = W.get("done") if isinstance(W, dict) else False}
+    $(# Round $(ROUND): $(("✅ done" if DONE else "⏳ in progress")) #)
+    ${:if DONE}${:break}${:fi}
+    ${:fi}
+${:done}
+
+${:if DONE}
+$(# 🎉 Goal achieved in round $(ROUND)/$(MAX)#)
 ${:fi}
 ```
 

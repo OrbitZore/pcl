@@ -49,3 +49,11 @@ Demonstrates: `.pcl` → `.pcl` import, template functions, load layer (import n
 ```
 
 Demonstrates: `#!/usr/bin/env pcl` + `chmod +x` for direct execution.
+
+## goal-loop — Goal achievement loop
+
+```bash
+./goal-loop.pcl "Create a file named hello.txt with content Hello PCL"
+```
+
+Demonstrates: `/goal`-style loop (act + check per round), `:while` + `:break` on boolean variable, `$(# … #)` note output, `$(@ … @)` context injection.

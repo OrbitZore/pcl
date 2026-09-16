@@ -464,8 +464,17 @@ class _Scanner:
                 self.tokens.append(TextTok("\n", line, 0))
             return
 
-        # C305：注释必须独占一行（同行的文本/其他构造在先即违例；
-        # 行界定注释会把行尾文本一并吞入注释负载，故后者不构成违例）
+        # 行首/行尾空白剥除（仅文本段；构造内容不动）——先剥再查 C305
+        if isinstance(items[0], _TextItem):
+            items[0].text = items[0].text.lstrip(STRIP_WS)
+            if not items[0].text:
+                items.pop(0)
+        if items and isinstance(items[-1], _TextItem):
+            items[-1].text = items[-1].text.rstrip(STRIP_WS)
+            if not items[-1].text:
+                items.pop()
+
+        # C305：注释必须独占一行（空白已剥除；行界定注释吞行尾文本不违例）
         if any(isinstance(it, _CommentItem) for it in items):
             if len(items) != 1:
                 first = items[0]
@@ -476,16 +485,6 @@ class _Scanner:
                     file=self.file, line=ln, col=col + 1,
                 )
             return  # 独行注释：整行消除
-
-        # 行首/行尾空白剥除（仅文本段；构造内容不动）
-        if isinstance(items[0], _TextItem):
-            items[0].text = items[0].text.lstrip(STRIP_WS)
-            if not items[0].text:
-                items.pop(0)
-        if items and isinstance(items[-1], _TextItem):
-            items[-1].text = items[-1].text.rstrip(STRIP_WS)
-            if not items[-1].text:
-                items.pop()
 
         texts = [it for it in items if isinstance(it, _TextItem)]
         constructs = [it for it in items

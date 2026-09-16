@@ -18,16 +18,35 @@ PCL 将 `.pcl` 模板编译为可读的 Python 源码并在同一解释器中执
 首个适配的 agent 是 [pi](https://github.com/earendil-works/pi-coding-agent)：正向模式拉起 `pi --mode rpc` 完成 pass 交互与上下文管理；嵌入模式在 pi 会话内经 `/pcl` 命令族直接执行。
 
 ```text
-${SCORE = 0}
+${ROUND = 0}
+${DONE = False}
+${MAX = 100}
 
-${:pass :write SCORE}
-请就以下主题写一段话，并把自评质量分（0..10 整数）写入 SCORE：
-$prompt
+$(@
+目标：$prompt
+每轮两步：1.执行推进 2.检查是否达成。最多 ${MAX} 轮。
+@)
 
-${:if SCORE >= 7}
-质量达标，结束。
-${:else}
-分数不够，重写一遍，把新分数写入 SCORE。
+${:while ROUND < MAX}
+    ${ROUND = ROUND + 1}
+
+    ${:new}
+    ${:pass :read ROUND :write W}
+    执行者（第 $(ROUND) 轮）：采取行动推进目标。写入 W：{"W": "行动摘要"}
+
+    ${:new}
+    ${:pass :read ROUND :write W}
+    检查者：判断目标是否已达成。写入 W：{"W": {"done": true/false, "note": "理由"}}
+
+    ${:if 1}
+    ${DONE = W.get("done") if isinstance(W, dict) else False}
+    $(# 第 $(ROUND) 轮：$(("✅ 达成" if DONE else "⏳ 进行中")) #)
+    ${:if DONE}${:break}${:fi}
+    ${:fi}
+${:done}
+
+${:if DONE}
+$(# 🎉 目标在第 $(ROUND)/$(MAX) 轮达成#)
 ${:fi}
 ```
 

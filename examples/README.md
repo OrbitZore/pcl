@@ -13,6 +13,7 @@
 | [context-session.pcl](context-session.pcl) | 上下文接续 | `:save`/`:new`/`:load` 往返、会话记忆验证 |
 | [use-library.pcl](use-library.pcl) + [greetlib.pcl](greetlib.pcl) | 库复用 | `.pcl` 间 `import`、加载层（import 永不触发 agent）、模板函数跨文件调用 |
 | [hello.pcl](hello.pcl) | 可执行脚本 | shebang `#!/usr/bin/env pcl` + `chmod +x` → `./hello.pcl "主题"` 直执行 |
+| [goal-loop.pcl](goal-loop.pcl) | **目标达成循环**（/goal 同款） | 每轮两 pass（执行+检查），DONE 为真则 break；`$(# … #)` 注记输出 |
 
 ## 快速开始
 
