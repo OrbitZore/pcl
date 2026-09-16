@@ -306,7 +306,7 @@ class _Scanner:
             m = _DELIM_MARKER_RE.match(src, content_off, content_off + 256)
             if m and m.group(1):
                 delim, marker = m.group(1), m.group(2)
-                closer_str = marker + delim + ")"   # 对称：<delim># … #<delim>)
+                closer_str = marker + delim + ")"   # 严格对称：<delim># … #<delim>) / <delim>@ … @<delim>)
                 end = src.find(closer_str, m.end())
                 if end != -1:
                     body = src[m.end():end].strip("\n")

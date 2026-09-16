@@ -263,7 +263,7 @@ def test_extended_delimiter_note():
 
 def test_extended_delimiter_context():
     """$(@raw 内容含 @) 不冲突 @raw)。"""
-    ts = toks("$(@raw\n上下文含 @) 和 #)\n#raw)\n尾\n")
+    ts = toks("$(@raw\n上下文含 @) 和 #)\n@raw)\n尾\n")
     assert any(isinstance(t, ContextTok) for t in ts)
     assert texts("尾\n") == ["尾\n"]
 
