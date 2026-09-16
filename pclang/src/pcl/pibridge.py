@@ -302,6 +302,14 @@ class PiBridge(IAgentBridge):
         if self._transport is not None:
             self._transport.close()
 
+    def note(self, text: str) -> bool:
+        """嵌入形态：注记经 note 命令下发（连接器 appendEntry 进会话流）；
+        正向形态返回 False（回落输出文档）。"""
+        if not self.embed:
+            return False
+        self._call({"type": "note", "text": text})
+        return True
+
     def abort(self):
         try:
             self._send({"type": "abort"})

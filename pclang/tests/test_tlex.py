@@ -204,3 +204,30 @@ def test_bom_and_l102(tmp_path):
     bad.write_bytes(b"\xff\xfe\x00")
     with pytest.raises(PclCompileError, match="L102"):
         compile_file(bad)
+
+
+# ---- ${# 注释简写与 $(# 注记模板（v0.2） ----------------------------------------
+
+def test_comment_shorthand():
+    for short in ("${# 简写}", "${#no-space}"):
+        assert texts(short + "\n尾\n") == ["尾\n"]   # 整行消除、等效 ${:#}
+    # 注释吞到行尾：${# 后的一切属注释负载，不构成 C305
+    assert texts("${# c} 文本\n") == []
+    assert err_code("文本 ${# c}") == "C305"          # 前置内容才触发
+
+
+def test_note_construct():
+    ts = toks("前 $(# 注 (嵌套)) 后\n")
+    kinds = [type(t).__name__ for t in ts]
+    assert kinds == ["TextTok", "NoteTok", "TextTok", "TextTok"]
+    note = ts[1]
+    assert note.text == "注 (嵌套)" and note.no_output is False
+    # 行保留（注记产生输出）+ 换行
+    assert ts[-1].text == "\n"
+
+
+def test_note_single_line_and_closure():
+    assert err_code("$(# 跨\n行)") == "L100"          # 单行限制
+    assert err_code("$(# 未闭合") == "L100"
+    # 转义：$$ 产出字面 $，其后为普通文本（不构成注记）
+    assert texts("$$(# 不是注记)\n") == ["$(# 不是注记)\n"]

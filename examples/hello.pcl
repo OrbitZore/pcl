@@ -1,0 +1,4 @@
+#!/usr/bin/env pcl
+${:# 可执行脚本：chmod +x hello.pcl && ./hello.pcl "主题"}
+${:pass}
+请用一句话解释：$prompt

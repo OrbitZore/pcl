@@ -220,3 +220,10 @@ def test_load_stale_token_r430():
     with _run_with(_CountingBridge()):
         with pytest.raises(PclError, match="R430"):
             runtime.load("nope")
+
+
+def test_note_standalone_goes_to_output():
+    r = Run(bridge=_CountingBridge())
+    with r:
+        runtime.note("独立注记")
+    assert r.output == "独立注记"

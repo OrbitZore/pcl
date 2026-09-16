@@ -28,6 +28,7 @@ from .tparse import (
     Interp,
     Load,
     NewCtx,
+    Note,
     Pass,
     Return,
     Save,
@@ -242,6 +243,12 @@ class _Emitter:
     def emit_node(self, nd):
         if isinstance(nd, Text):
             self.append_const(nd.text, nd.line)
+        elif isinstance(nd, Note):
+            # 注记：发起型保序（先冲刷合并段）——独立运行渲染进输出文档，
+            # 嵌入运行经桥接层 note 命令进会话 custom 条目（不进 LLM 上下文）
+            self.flush()
+            self.uses.add("note")
+            self.w(f"note({pystr(nd.text)})", nd.line)
         elif isinstance(nd, Interp):
             self.emit_interp(nd)
         elif isinstance(nd, If):
@@ -391,7 +398,7 @@ def _main_globals(nodes: list) -> set[str]:
 
 
 _RUNTIME_ORDER = ("emit", "text", "submit", "push_sink", "pop_sink",
-                  "save", "load", "new_ctx", "__pcl_freeze")
+                  "note", "save", "load", "new_ctx", "__pcl_freeze")
 
 
 def _is_load_item(nd) -> bool:

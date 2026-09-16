@@ -276,3 +276,25 @@ def test_library_form_unaffected_by_settings(settings_env, tmp_pcl):
     (settings_env / "xdg" / "pcl" / "settings.json").unlink()
     r2 = pcl.run_program(str(p), "hi", agent="null", cache_dir=None)
     assert r1.output == r2.output == "L=[hi]\n"
+
+
+# ---- shebang 直执行 -----------------------------------------------------------
+
+def test_shebang_direct_execution(capsys, tmp_path, tmp_pcl):
+    """`#!/usr/bin/env pcl` + chmod +x → ./script.pcl [args] 直接运行。"""
+    import stat as stat_mod
+
+    p = tmp_pcl("S=[$prompt]\n")
+    p.write_text("#!/usr/bin/env pcl\nS=[$prompt]\n", encoding="utf-8")
+    p.chmod(p.stat().st_mode | stat_mod.S_IEXEC)
+    code, out, _ = run_cli([str(p), "hello", "--agent", "null",
+                            "--cache", "none"], capsys)
+    assert code == 0
+    assert out == "S=[hello]\n"
+
+
+def test_shebang_not_hijacked_by_non_pcl(capsys, tmp_path):
+    """非 .pcl 后缀的首位置参数不受 shebang 展开影响。"""
+    code, out, err = run_cli(["version"], capsys)
+    assert code == 0
+    assert out.startswith("pcl ")

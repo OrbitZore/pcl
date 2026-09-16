@@ -163,3 +163,8 @@ def test_empty_blocks():
     compile_source("${:while x}${:done}", "t.pcl")
     compile_source("${:for i in x}${:done}", "t.pcl")
     compile_source("${:function f}${:endfunction}", "t.pcl")
+
+
+def test_note_reserved_name():
+    assert code("${note = 1}") == "C300"               # note 为第 9 个运行时名
+    compile_source("$(# 合法注记)\n", "t.pcl")

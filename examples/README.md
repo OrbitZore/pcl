@@ -12,6 +12,7 @@
 | [data-analysis.pcl](data-analysis.pcl) | 结构化数据按需拉取 | Python 侧造数、`:read` 快照、agent 经 `pcl_read` 取数（不拼进 prompt） |
 | [context-session.pcl](context-session.pcl) | 上下文接续 | `:save`/`:new`/`:load` 往返、会话记忆验证 |
 | [use-library.pcl](use-library.pcl) + [greetlib.pcl](greetlib.pcl) | 库复用 | `.pcl` 间 `import`、加载层（import 永不触发 agent）、模板函数跨文件调用 |
+| [hello.pcl](hello.pcl) | 可执行脚本 | shebang `#!/usr/bin/env pcl` + `chmod +x` → `./hello.pcl "主题"` 直执行 |
 
 ## 快速开始
 
@@ -34,6 +35,16 @@ pcl run context-session.pcl
 
 # 查看任一示例生成的 Python 源
 pcl gen review-prove.pcl
+```
+
+## 可执行脚本
+
+任何 `.pcl` 加 shebang 并赋执行权即可像 shell 脚本一样直接运行：
+
+```bash
+chmod +x hello.pcl
+./hello.pcl "量子纠缠"          # 等价 pcl run hello.pcl "量子纠缠"
+./hello.pcl --agent null        # 后续参数透传
 ```
 
 ## 提示

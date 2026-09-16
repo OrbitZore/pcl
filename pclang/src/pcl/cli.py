@@ -163,6 +163,13 @@ def main(argv: list[str] | None = None) -> int:
     # 位置参数）——首个 ``--`` 后的 token 一律并入 PROMPT、自身移除（§10），
     # 与连接器侧 /pcl run 的切分规则一致（§9.1）。
     argv = list(sys.argv[1:] if argv is None else argv)
+
+    # shebang 直执行：`#!/usr/bin/env pcl` 使内核以 `pcl <script.pcl> [args…]`
+    # 调起——首参数为 .pcl 文件时自动展开为 `pcl run <file> [args…]`
+    _SUBCMDS = {"run", "gen", "check", "config", "version"}
+    if (argv and not argv[0].startswith("-") and argv[0] not in _SUBCMDS
+            and argv[0].endswith(".pcl") and Path(argv[0]).is_file()):
+        argv = ["run", *argv]
     extra_prompt: list[str] = []
     if argv and argv[0] == "run":
         if "--" in argv:

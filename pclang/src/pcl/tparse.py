@@ -24,12 +24,12 @@ import re
 from dataclasses import dataclass, field
 
 from .errors import PclCompileError
-from .tlex import DirTok, InterpTok, TextTok
+from .tlex import DirTok, InterpTok, NoteTok, TextTok
 
-# 运行时保留名（DSL §9.2：8 名一律保留，无论是否用到）
+# 运行时保留名（DSL §9.2：9 名一律保留，无论是否用到；note 为 v0.2 新增）
 RUNTIME_RESERVED = frozenset({
     "emit", "text", "submit", "save", "load",
-    "new_ctx", "push_sink", "pop_sink",
+    "new_ctx", "push_sink", "pop_sink", "note",
 })
 # :function 名专用保留
 FUNCTION_RESERVED = frozenset({"main", "prompt", "reply"})
@@ -48,6 +48,14 @@ class Node:
 @dataclass
 class Text(Node):
     text: str
+
+
+@dataclass
+class Note(Node):
+    """注记 ``$(# …)``：独立运行渲染进输出文档；嵌入经桥接层进会话 custom
+    条目；均不进 LLM 上下文。"""
+
+    text: str = ""
 
 
 @dataclass
@@ -243,6 +251,10 @@ class _Parser:
             t = self.toks[i]
             if isinstance(t, TextTok):
                 nodes.append(Text(t.line, t.col, t.text))
+                i += 1
+                continue
+            if isinstance(t, NoteTok):
+                nodes.append(Note(t.line, t.col, t.text))
                 i += 1
                 continue
             if isinstance(t, InterpTok):
@@ -477,6 +489,10 @@ class _Parser:
                              "pass 体内插值不允许 break/continue/return"
                              "（会跳过自动提交点，泄漏缓冲）", t.line, t.col)
                 body.append(node)
+                i += 1
+                continue
+            if isinstance(t, NoteTok):
+                body.append(Note(t.line, t.col, t.text))
                 i += 1
                 continue
             break

@@ -364,6 +364,17 @@ class Bridge {
         await this.contextOp(cmd, respond);
         return;
       }
+      case "note": {
+        // 模板注记 $(# …)：附加进会话流（custom entry，不进 LLM 上下文）
+        try {
+          latestPi!.appendEntry("pcl-note", { text: String(cmd.text ?? "") });
+          respond(this.ok(id, "note"));
+        } catch (err) {
+          respond(this.fail(id, "note",
+            err instanceof Error ? err.message : String(err)));
+        }
+        return;
+      }
       case "get_last_assistant_text": {
         respond(this.ok(id, "get_last_assistant_text",
           { text: this.replyCache || null }));
@@ -677,6 +688,12 @@ export default function (pi: ExtensionAPI): void {
 
   // /pcl run 结果的会话流渲染（custom entry：不进 LLM 上下文；未展开预览，
   // 展开键查看全部——替代旧常驻 widget）
+  // 模板注记 $(# …)：随对话滚动、不进上下文（嵌入形态的渲染目的地）
+  pi.registerEntryRenderer("pcl-note", (entry: any) => {
+    const text = String(entry?.data?.text ?? "");
+    return new Text(`▌ ${text}`, 1, 0);
+  });
+
   pi.registerEntryRenderer("pcl-run-output", (entry: any, options: any) => {
     const d = entry?.data ?? {};
     const lines: string[] = Array.isArray(d.lines) ? d.lines : [];

@@ -86,6 +86,33 @@ class DirTok:
         self.col = col
 
 
+class NoteTok:
+    """注记模板 ``$(# …)``：内容逐字（圆括号配平、单行）。
+
+    渲染为注记——正向/独立运行进输出文档（保序）；嵌入运行经桥接层
+    ``note`` 命令由连接器以 custom entry（pcl-note）附加进会话流；
+    两种形态均不进入 LLM 上下文。
+    """
+
+    __slots__ = ("text", "line", "col")
+
+    def __init__(self, text: str, line: int, col: int):
+        self.text = text
+        self.line = line
+        self.col = col
+
+    @property
+    def no_output(self) -> bool:
+        return False   # 注记产生输出（输出文档或会话条目）——独行不消除
+
+
+class _NoteItem:
+    __slots__ = ("tok",)
+
+    def __init__(self, tok: NoteTok):
+        self.tok = tok
+
+
 class _CommentItem:
     """词法内部的注释行项（最终整行消除，不进 Token 流）。"""
 
@@ -249,6 +276,13 @@ class _Scanner:
             if content_off + 1 < self.n and src[content_off + 1] == "#":
                 return self._comment(start_off)
             return self._directive(start_off, content_off, row, col)
+        if src[i + 1] == "{":
+            if content_off < self.n and src[content_off] == "#":
+                # 注释简写 ${# …（≡ ${:# …，行界定）
+                return self._comment(start_off)
+        elif src[i + 1] == "(" and content_off < self.n and src[content_off] == "#":
+            # 注记模板 $(# …)：圆括号配平、单行、内容逐字（非 Python 语句）
+            return self._note(start_off, content_off, row, col)
         closer = "}" if src[i + 1] == "{" else ")"
         form = "{" if closer == "}" else "("
         closer_off, saw_nl = self._find_closer(content_off, closer)
@@ -262,6 +296,28 @@ class _Scanner:
         stmts = parse_interp_content(content, self.file, row, col + 1)
         self.items.append(_InterpItem(InterpTok(form, content, stmts, row, col + 1)))
         return closer_off + 1
+
+    def _note(self, start_off: int, hash_off: int, row: int, col: int) -> int:
+        """``$(# …)``：手工配平扫描（内容为自然语言，不经 Python tokenizer）。"""
+        depth = 1
+        i = hash_off + 1
+        while i < self.n:
+            c = self.src[i]
+            if c == "\n":
+                break   # 注记单行；跨行即未闭合
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+                if depth == 0:
+                    text = self.src[hash_off + 1:i].lstrip(" \t")
+                    self.items.append(_NoteItem(NoteTok(text, row, col + 1)))
+                    return i + 1
+            i += 1
+        raise PclCompileError(
+            "L100", "注记 $(# …) 未闭合（单行、内容圆括号需配平）",
+            file=self.file, line=row, col=col + 1,
+        )
 
     def _comment(self, start_off: int) -> int:
         """${:# …}：行界定，# 起至行尾整体丢弃（§4.5）。"""
@@ -369,7 +425,7 @@ class _Scanner:
                 ln = first.tok.line if isinstance(first, (_InterpItem, _DirItem)) else first.line
                 col = first.tok.col if isinstance(first, (_InterpItem, _DirItem)) else first.col
                 raise PclCompileError(
-                    "C305", "注释 ${:# …} 必须独占一行",
+                    "C305", "注释 ${:# …}/${# …} 必须独占一行",
                     file=self.file, line=ln, col=col + 1,
                 )
             return  # 独行注释：整行消除
@@ -385,7 +441,8 @@ class _Scanner:
                 items.pop()
 
         texts = [it for it in items if isinstance(it, _TextItem)]
-        constructs = [it for it in items if isinstance(it, (_InterpItem, _DirItem))]
+        constructs = [it for it in items
+                      if isinstance(it, (_InterpItem, _DirItem, _NoteItem))]
 
         if not constructs:
             text = "".join(it.text for it in texts)
@@ -393,7 +450,7 @@ class _Scanner:
             return
 
         if texts or not all(
-            it.tok.no_output if isinstance(it, _InterpItem) else True
+            it.tok.no_output if isinstance(it, (_InterpItem, _NoteItem)) else True
             for it in constructs
         ):
             # 含文本或含输出构造：整行保留

@@ -254,6 +254,14 @@ def new_ctx() -> None:
     _require_run().bridge.new_ctx()
 
 
+def note(text: str) -> None:
+    """注记 ``$(# …)``：桥接层支持（嵌入形态）则下发为会话 custom 条目，
+    否则（独立运行）渲染进输出文档——两种形态均不进 LLM 上下文。"""
+    run = _require_run()
+    if not run.bridge.note(text):
+        run.emit(text)
+
+
 # ---- run_program（公共 API，DESIGN §6） ----------------------------------
 
 def _parse_pcl_annotations(source: str) -> dict[int, int]:

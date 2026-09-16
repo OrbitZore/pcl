@@ -83,6 +83,10 @@ while True:
              data={"commands": [{"name": "pcl", "source": "extension"}]})
     elif t == "set_session_name":
         resp(cid, "set_session_name")
+    elif t == "note":
+        print("NOTE:", c.get("text", ""))
+        sys.stdout.flush()
+        resp(cid, "note")
     elif t == "get_last_assistant_text":
         resp(cid, "get_last_assistant_text", data={"text": last_reply})
     elif t == "prompt":
