@@ -1,0 +1,8 @@
+{
+  "name": "pcl-monorepo-bridge",
+  "private": true,
+  "description": "Bridge manifest: lets `pi install git:github.com/OrbitZore/pcl` discover the connector resources in the monorepo subdirectory (see pcl-connector/pi/)",
+  "pi": {
+    "extensions": ["pcl-connector/pi/extensions"]
+  }
+}

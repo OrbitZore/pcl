@@ -81,7 +81,7 @@ pip install pclang        # 或：pipx install pclang / uvx pclang
 安装 pi 连接器（正向 `--agent pi` 与嵌入 `/pcl` 命令族）：
 
 ```bash
-pi install git:github.com/OrbitZore/pcl --directory pcl-connector/pi
+pi install git:github.com/OrbitZore/pcl
 # PyPI 发布后：pi install npm:pcl-connector-pi
 ```
 

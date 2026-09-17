@@ -83,7 +83,7 @@ Requires Python ≥ 3.10. Zero runtime dependencies.
 For the pi connector (forward `--agent pi` and embedded `/pcl` commands):
 
 ```bash
-pi install git:github.com/OrbitZore/pcl --directory pcl-connector/pi
+pi install git:github.com/OrbitZore/pcl
 # or after PyPI release: pi install npm:pcl-connector-pi
 ```
 
