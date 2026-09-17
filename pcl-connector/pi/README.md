@@ -8,8 +8,9 @@
 
 ```bash
 # ① pi 包安装（推荐；本地路径——相对 settings 解析，不复制）
-pi install /path/to/pcl-connector/pi
-#    发布后：pi install npm:pcl-connector-pi   /   pi install git:github.com/OrbitZore/pcl
+pi install npm:pcl-connector-pi        # 推荐（npm 已发布）
+#    开发源：pi install git:github.com/OrbitZore/pcl
+#    本地路径：pi install /path/to/pcl-connector/pi
 
 # ② 临时试用（不写 settings，本次运行生效）
 pi -e /path/to/pcl-connector/pi

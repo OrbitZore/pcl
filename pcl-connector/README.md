@@ -23,7 +23,8 @@ PCL 的桥接层抽象为多 agent 后端做准备（RFC 0001 §6：**其他 age
 ## 安装（以 pi 为例）
 
 ```bash
-pi install /abs/path/to/pcl-connector/pi      # 本地路径（发布后 npm:/git: 源）
+pi install npm:pcl-connector-pi               # npm（已发布）
+pi install /abs/path/to/pcl-connector/pi      # 本地路径（开发）
 pi -e /abs/path/to/pcl-connector/pi           # 临时试用
 ```
 

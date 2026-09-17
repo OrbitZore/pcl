@@ -82,24 +82,24 @@ pip install pclang        # 或：pipx install pclang / uvx pclang
 安装 pi 连接器（正向 `--agent pi` 与嵌入 `/pcl` 命令族）：
 
 ```bash
-pi install git:github.com/OrbitZore/pcl
-# PyPI 发布后：pi install npm:pcl-connector-pi
+pi install npm:pcl-connector-pi
+# 可选开发源：pi install git:github.com/OrbitZore/pcl
 ```
 
 ## 快速上手
 
 ```bash
 # 纯模板调试（无需 LLM）
-pcl run examples/demo.pcl "为什么天空是蓝色的" --agent null
+pcl run examples/hello.pcl "为什么天空是蓝色的" --agent null
 
-# 使用真实 agent
-pcl run examples/demo.pcl "为什么天空是蓝色的" --agent pi
+# 真实 agent（目标循环：每轮执行+检查，达成即停）
+pcl run examples/goal-loop.pcl "在当前目录创建 hello.txt，内容为 Hello PCL" --agent pi
 
 # 实时观察循环进度
 pcl run examples/review-prove.pcl "高铁为什么不能用有砟轨道" --trace
 
 # 查看生成的 Python 源码
-pcl gen examples/demo.pcl
+pcl gen examples/hello.pcl
 ```
 
 更多示例见 [examples/](examples/)。

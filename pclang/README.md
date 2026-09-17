@@ -40,7 +40,7 @@ pcl check demo.pcl                          # 编译 + 语法检查
 
 主包不含连接器（拆包分发；多后端连接器族见 [pcl-connector/](https://github.com/OrbitZore/pcl/tree/main/pcl-connector/)）。安装三选一：
 
-1. **pi 包**：`pi install /path/to/pcl-connector/pi`（`pi -e` 同路径临时试用；`pi remove` 卸载）；
+1. **pi 包**：`pi install npm:pcl-connector-pi`（npm 已发布；`pi remove` 卸载）；
 2. **预装**：复制/链接 `pcl-connector/pi/extensions` 到 `~/.pi/agent/extensions/`——`--connector-path` 缺省 `none` 即用；
 3. **运行时直指**：`--connector-path /path/to/pcl-connector/pi`（包目录或 `extensions/index.ts`）。
 

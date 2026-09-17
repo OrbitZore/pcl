@@ -84,24 +84,24 @@ Requires Python ≥ 3.10. Zero runtime dependencies.
 For the pi connector (forward `--agent pi` and embedded `/pcl` commands):
 
 ```bash
-pi install git:github.com/OrbitZore/pcl
-# or after PyPI release: pi install npm:pcl-connector-pi
+pi install npm:pcl-connector-pi
+# optional dev source: pi install git:github.com/OrbitZore/pcl
 ```
 
 ## Quick Start
 
 ```bash
 # Pure template debugging (no LLM needed)
-pcl run examples/demo.pcl "Why is the sky blue?" --agent null
+pcl run examples/hello.pcl "Why is the sky blue?" --agent null
 
-# With a real agent
-pcl run examples/demo.pcl "Why is the sky blue?" --agent pi
+# With a real agent (goal loop: act + check per round until done)
+pcl run examples/goal-loop.pcl "Create hello.txt with content Hello PCL" --agent pi
 
 # Watch progress in real time
 pcl run examples/review-prove.pcl "Why can't high-speed rail use ballasted track?" --trace
 
 # View generated Python source
-pcl gen examples/demo.pcl
+pcl gen examples/hello.pcl
 ```
 
 More examples in [examples/](examples/).
