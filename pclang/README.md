@@ -50,4 +50,4 @@ pcl check demo.pcl                          # 编译 + 语法检查
 
 ## 许可
 
-MIT
+GPL-3.0

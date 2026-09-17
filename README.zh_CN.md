@@ -7,7 +7,7 @@
 [![CI](https://github.com/USER/pcl/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/pcl/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/pclang.svg)](https://pypi.org/project/pclang/)
 [![Python](https://img.shields.io/pypi/pyversions/pclang.svg)](https://pypi.org/project/pclang/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ---
 
@@ -133,4 +133,4 @@ ruff check src tests                # 代码检查
 
 ## 许可
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)

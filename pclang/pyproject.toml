@@ -8,7 +8,7 @@ version = "0.2.0.dev0"
 description = "PCL — Prompt Control Language：编排 LLM/agent 的模板 DSL（模板层是 PCL，脚本层是真 Python）"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "GPL-3.0-or-later" }
 dependencies = []                   # 运行时零第三方依赖
 authors = [{ name = "pcl contributors" }]
 keywords = ["prompt", "llm", "agent", "template", "dsl", "pi"]
@@ -16,7 +16,7 @@ classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",

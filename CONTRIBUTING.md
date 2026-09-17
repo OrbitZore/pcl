@@ -78,4 +78,4 @@ pcl/
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+By contributing, you agree that your contributions will be licensed under the [GNU GPL v3](LICENSE) (GPL-3.0-or-later).
