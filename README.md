@@ -4,6 +4,7 @@
 
 A template DSL for orchestrating LLM agents: **the template layer is PCL, the script layer is real Python**.
 
+[![Docs](https://img.shields.io/badge/docs-orbitzore.github.io%2Fpcl-blue)](https://orbitzore.github.io/pcl/)
 [![CI](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml/badge.svg)](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/pclang.svg)](https://pypi.org/project/pclang/)
 [![Python](https://img.shields.io/pypi/pyversions/pclang.svg)](https://pypi.org/project/pclang/)
@@ -109,6 +110,7 @@ More examples in [examples/](examples/).
 
 | Page | Description |
 |------|-------------|
+| **[Documentation site](https://orbitzore.github.io/pcl/)** | Bilingual user docs (中文 / English) |
 | [Quickstart & Guide](docs/en/index.md) | User docs (English / 中文) |
 | [Language Reference](docs/en/language.md) | Cheat sheet: constructs, directives, pass semantics |
 | [RFCs](rfc/README.md) | Normative specs: language / runtime / connector |

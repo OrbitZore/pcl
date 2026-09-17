@@ -4,6 +4,7 @@
 
 编排 LLM/agent 的模板 DSL：**模板层是 PCL，脚本层是真 Python**。
 
+[![Docs](https://img.shields.io/badge/docs-orbitzore.github.io%2Fpcl-blue)](https://orbitzore.github.io/pcl/)
 [![CI](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml/badge.svg)](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/pclang.svg)](https://pypi.org/project/pclang/)
 [![Python](https://img.shields.io/pypi/pyversions/pclang.svg)](https://pypi.org/project/pclang/)
@@ -107,6 +108,7 @@ pcl gen examples/demo.pcl
 
 | 页面 | 说明 |
 |------|------|
+| **[文档站](https://orbitzore.github.io/pcl/)** | 双语用户文档（中文 / English） |
 | [快速开始与指南](docs/zh/index.md) | 用户文档（中文 / English） |
 | [语言参考](docs/zh/language.md) | 速查：构造、指令、pass 语义 |
 | [RFC 规范](rfc/README.md) | 语言定义 / 执行层 / 连接器（开发者向） |
