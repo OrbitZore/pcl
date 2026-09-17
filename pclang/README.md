@@ -46,7 +46,7 @@ pcl check demo.pcl                          # 编译 + 语法检查
 
 ## 文档
 
-- [语言规范 DSL.md](../docs/DSL.md) · [实现设计 DESIGN.md](../docs/DESIGN.md)（v0.1 终审冻结；实现期实测修正见 DESIGN §16）
+- 规范与实现契约：[RFC 0000 语言](../rfc/rfc-0000-language.zh.md) · [RFC 0001 执行层](../rfc/rfc-0001-runtime.zh.md) · [RFC 0002 连接器](../rfc/rfc-0002-connector.zh.md)
 
 ## 许可
 

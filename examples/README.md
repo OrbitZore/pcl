@@ -6,7 +6,6 @@
 
 | 用例 | 场景 | 机制要点 |
 |---|---|---|
-| [demo.pcl](demo.pcl) | 单轮自评：写作 + 评分 + 分支 | `$prompt` 裸糖、`:pass :write`、`:if/:else` |
 | [review-prove.pcl](review-prove.pcl) | **审查报告 → 自证循环，直到全部主张可信** | `:while` + `:break`、结构化写回（字符串数组）、跨轮状态（PENDING）、`:function` 内 pass |
 | [plan-review.pcl](plan-review.pcl) | **方案制作 → 自评循环，10 分制直到 10 分** | `:while` 阈值循环、整数写回校验（bool 陷阱防护）、轮次上限 |
 | [data-analysis.pcl](data-analysis.pcl) | 结构化数据按需拉取 | Python 侧造数、`:read` 快照、agent 经 `pcl_read` 取数（不拼进 prompt） |
@@ -22,7 +21,6 @@
 pcl run use-library.pcl --agent null
 
 # ② 单轮（约 1 次 LLM 调用）
-pcl run demo.pcl "为什么天空是蓝色的"
 
 # ③ 循环场景（多轮，每轮 1 次 LLM 调用；上限内置）
 #    回复只在每轮结束时落 stdout——长循环建议开 --trace 看 stderr 实时进度：
@@ -43,7 +41,6 @@ pcl gen review-prove.pcl
 全部示例已加 shebang（`#!/usr/bin/env pcl`）并赋执行权（`+x`），可直接运行：
 
 ```bash
-./demo.pcl "为什么天空是蓝色的"
 ./review-prove.pcl "高铁为什么不能用有砟轨道" --trace
 ./plan-review.pcl "为 10 人团队制定一次季度技术分享会方案"
 ./context-session.pcl

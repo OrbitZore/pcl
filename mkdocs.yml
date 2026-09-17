@@ -43,9 +43,23 @@ markdown_extensions:
       permalink: true
 
 nav:
-  - Home: index.md
-  - Language Reference: dsl.md
-  - Architecture: design.md
-  - Settings: settings.md
-  - Examples: examples.md
-  - Changelog: changelog.md
+  - 中文文档:
+    - 首页: zh/index.md
+    - 快速开始: zh/quickstart.md
+    - 核心指南: zh/guide.md
+    - 语言参考: zh/language.md
+    - CLI 手册: zh/cli.md
+    - 设置: zh/settings.md
+    - 示例: zh/examples.md
+    - FAQ: zh/faq.md
+    - 更新日志: zh/changelog.md
+  - English:
+    - Home: en/index.md
+    - Quickstart: en/quickstart.md
+    - Guide: en/guide.md
+    - Language Reference: en/language.md
+    - CLI Manual: en/cli.md
+    - Settings: en/settings.md
+    - Examples: en/examples.md
+    - FAQ: en/faq.md
+    - Changelog: en/changelog.md

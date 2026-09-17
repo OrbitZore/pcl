@@ -41,5 +41,5 @@ pi update --extensions                # 更新全部包（git ref 复核）
 ## 兼容性
 
 pi ≥ 0.85（依赖 `SessionManager.open/getCwd`、`session_shutdown.reason`、
-`ReplacedSessionContext`；实测记录见 [DESIGN §16](../../../docs/DESIGN.md)）。
+`ReplacedSessionContext`；契约见 [RFC 0002 §7](../../../rfc/rfc-0002-connector.zh.md)）。
 协议版本随主包 `/pcl version` 握手（R16）。

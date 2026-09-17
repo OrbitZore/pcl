@@ -99,9 +99,10 @@ pcl gen examples/demo.pcl
 
 | 页面 | 说明 |
 |------|------|
-| [语言规范](docs/dsl.md) | 完整语法：构造、指令、pass 语义 |
-| [实现设计](docs/design.md) | 架构、编译管线、运行时、桥接层 |
-| [设置文件](docs/settings.md) | 用户级与项目级配置 |
+| [快速开始与指南](docs/zh/index.md) | 用户文档（中文 / English） |
+| [语言参考](docs/zh/language.md) | 速查：构造、指令、pass 语义 |
+| [RFC 规范](rfc/README.md) | 语言定义 / 执行层 / 连接器（开发者向） |
+| [设置](docs/zh/settings.md) | 用户级与项目级配置 |
 | [示例集](examples/) | 可运行场景：循环、上下文、数据分析、库复用 |
 
 ## 核心概念

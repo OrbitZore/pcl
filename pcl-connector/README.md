@@ -14,7 +14,7 @@ PCL 的桥接层抽象为多 agent 后端做准备（DESIGN §3：**其他 agent
 
 1. 一个子包一个目录：`<backend>/package.json`（`pi` 清单或约定目录）+ 扩展源码；
    无构建——宿主 agent 经 jiti 直接加载 TS（或按目标生态约定）；
-2. 语言契约（pass 读写、上下文三指令、错误码族）以 [DSL.md](../docs/DSL.md) 为准，
+2. 语言契约（pass 读写、上下文三指令、错误码族）以 [RFC 0000](../rfc/rfc-0000-language.zh.md) 为准，
    协议面冻结（R16）；后端差异（信令通道、会话语义）收敛在子包内；
 3. Python 侧经 `pcl/bridge.py` 的 `IAgentBridge` 对应扩展（`--agent <backend>`），
    子包与桥一一对应、版本握手经 `/pcl version`；

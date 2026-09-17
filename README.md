@@ -99,9 +99,10 @@ More examples in [examples/](examples/).
 
 | Page | Description |
 |------|-------------|
-| [Language Reference](docs/dsl.md) | Complete syntax: constructs, directives, pass semantics |
-| [Design](docs/design.md) | Architecture, compiler pipeline, runtime, bridge layer |
-| [Settings](docs/settings.md) | User-level and project-level configuration |
+| [Quickstart & Guide](docs/en/index.md) | User docs (English / 中文) |
+| [Language Reference](docs/en/language.md) | Cheat sheet: constructs, directives, pass semantics |
+| [RFCs](rfc/README.md) | Normative specs: language / runtime / connector |
+| [Settings](docs/en/settings.md) | User-level and project-level configuration |
 | [Examples](examples/) | Runnable scenarios: loops, context, data analysis, library reuse |
 
 ## Key Concepts
