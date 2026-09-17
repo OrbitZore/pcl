@@ -37,9 +37,13 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: npm Trusted Publishing 需较新 CLI
         run: npm install -g npm@latest
-      - name: Publish pcl-connector-pi
+      - name: Publish pcl-connector-pi（幂等：已在 registry 则跳过）
         run: |
           V=$(node -p "require('./package.json').version")
+          if curl -sf "https://registry.npmjs.org/pcl-connector-pi/$V" > /dev/null; then
+            echo "pcl-connector-pi@$V already on npm — skip"
+            exit 0
+          fi
           if [[ "$V" == *-* ]]; then
             npm publish --access public --tag alpha   # 预发布 → alpha dist-tag
           else
