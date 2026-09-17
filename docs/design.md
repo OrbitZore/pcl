@@ -99,7 +99,7 @@ pi-package（`package.json` + `pi` 清单 + `extensions/index.ts`）：
 - `/pcl` 命令族：run（嵌入执行+代理）/ gen/check/config/version（直通）/ pass（机器子命令）
 - `pcl_write`/`pcl_read` 工具（名单校验、快照本地应答）
 - `before_agent_start`：按需注入读写协议
-- `~/.pcl/bin/` 自动命令：递归扫描可执行文件，路径展平注册 `/pcl-<dir>-<name>`
+- `~/.pcl/bin/` 自动命令：递归扫描可执行文件，路径展平注册 `/pcl-<dir>-<name>`；一律作为 pcl 脚本嵌入当前会话运行（embedded，从不 spawn）
 - 嵌入代理表：prompt/get_state/get_commands/get_last_assistant_text/note/context/abort/set_session_name/new_session/switch_session
 - 结果呈现：notify 退出码+输出文件路径（不追加全量条目到会话流）
 

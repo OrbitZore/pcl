@@ -12,6 +12,8 @@
  *   - `/pcl gen|check <file.pcl>`：纯编译直通（spawn 捕获 stdout）；
  *   - `/pcl version`：版本直通（协议握手，R16）；
  *   - 未知/缺省子命令 → 用法提示（不列 pass）；
+ * - `~/.pcl/bin/` 自动命令（`/pcl-<dir>-<name>`）：递归扫描可执行文件，
+ *   一律作为 pcl 脚本经 runEmbedded 嵌入当前会话运行（从不 spawn）；
  * - `pcl_write` / `pcl_read` 工具：写回通道（名单先行拒绝、引导当轮重试；
  *   参数经命名键 values 承载——pi@0.85.1 实测顶层开放形状被校验层剥空）
  *   与读取通道（查快照本地应答）；
@@ -691,7 +693,7 @@ function usage(ctx: ExtensionCommandContext): void {
   ].join("\n"), "info");
 }
 
-// ---- ~/.pcl/bin/ 自动命令注册 ------------------------------------------------
+// ---- ~/.pcl/bin/ 自动命令注册（embedded：一律作为 pcl 脚本在当前会话运行） ------
 
 function registerBinCommands(pi: ExtensionAPI): void {
   const binDir = join(homedir(), ".pcl", "bin");
@@ -720,27 +722,10 @@ function registerBinCommands(pi: ExtensionAPI): void {
         const cmdName = "pcl-" + prefix + e.name;
         const relPath = prefix + e.name;
         pi.registerCommand(cmdName, {
-          description: `~/.pcl/bin/${relPath}`,
+          description: `~/.pcl/bin/${relPath}（embedded）`,
           handler: async (args: string, ctx: ExtensionCommandContext) => {
-            const proc = spawn(full, args.trim().split(/\s+/).filter(Boolean), {
-              stdio: ["ignore", "pipe", "pipe"],
-            });
-            let out = "", err = "";
-            proc.stdout?.setEncoding("utf-8");
-            proc.stdout?.on("data", (c: string) => (out += c));
-            proc.stderr?.setEncoding("utf-8");
-            proc.stderr?.on("data", (c: string) => (err += c));
-            const code = await new Promise<number | null>((res) => {
-              proc.on("close", (c) => res(c));
-              proc.on("error", () => res(null));
-            });
-            const text = (code === 0 ? out : out + (err ? "\n" + err : "")).trim();
-            if (text) {
-              appendResult(pi, `${cmdName}（退出码 ${code ?? "?"}）`,
-                           text.split("\n"));
-            }
-            ctx.ui.notify(`${cmdName} ${code === 0 ? "完成" : `失败（${code ?? "?"}）`}`,
-                          code === 0 ? "info" : "error");
+            const tokens = [full, ...args.trim().split(/\s+/).filter(Boolean)];
+            return runEmbedded(ctx, tokens);
           },
         });
       }
