@@ -3,6 +3,7 @@ name: release
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:            # 手动补发/重试（无需移 tag）
 
 jobs:
   pypi:
@@ -23,6 +24,23 @@ jobs:
         with:
           packages-dir: pclang/dist/
 
-# npm 连接器（pcl-connector-pi）由维护者本地发布（npm login + 2FA）：
-#   cd pcl-connector/pi && npm publish --access public
-# 如需 CI 发布，追加 job 并在仓库 Secrets 配置 NPM_TOKEN。
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+      - name: Publish pcl-connector-pi（未配置 NPM_TOKEN secret 时跳过）
+        if: ${{ secrets.NPM_TOKEN != '' }}      # step 级可访问 secrets（job 级不可）
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if [[ "$V" == *-* ]]; then
+            npm publish --access public --tag alpha   # 预发布 → alpha dist-tag
+          else
+            npm publish --access public               # stable → latest
+          fi
+        working-directory: pcl-connector/pi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
