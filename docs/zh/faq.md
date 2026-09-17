@@ -42,10 +42,10 @@ pcl gen file.pcl
 这是特性不是 bug——新上下文里的 pass prompt 必须自包含（目标、
 历史、轮次都要写进去）。想保留历史就去掉 `:new`。
 
-## `$prompt` 是什么？
+## `$(prompt)` 是什么？
 
 模板收到的第一个位置参数。`pcl run x.pcl "任务"` → `prompt = "任务"`。
-裸糖 `$prompt` ≡ `$(prompt)`；缺省 `""`。
+裸糖 `$(prompt)` ≡ `$(prompt)`；缺省 `""`。
 
 ## 输出里 dict 变成了 JSON？
 

@@ -30,7 +30,7 @@ _FRAGMENTS = [
     "${:for i in x}", "${:done}", "${:while x}", "${:pass}",
     "${:pass :read r :write w}", "${:save s}", "${:load l}", "${:new}",
     "${:break}", "${:continue}", "${:return r}", "${:function f(a=1)}",
-    "${:endfunction}", "${:if", "${:", "${:unknown}", "$prompt", "$prompts",
+    "${:endfunction}", "${:if", "${:", "${:unknown}", "$(prompt)", "$prompts",
     "$prompté", '"', '"""', "'''", 'r"', "b'", 'f"', "\\", "\\\\",
     "{", "}", "(", ")", "[", "]", ",", ";", ":",
     " ", " ", "\x00", "\x1b", " ",

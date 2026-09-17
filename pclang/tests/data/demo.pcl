@@ -3,7 +3,7 @@ ${SCORE = 0}
 
 ${:pass :write SCORE}
 请就以下主题写一段话，并把自评质量分（0..10 整数）写入 SCORE：
-$prompt
+$(prompt)
 
 ${:if SCORE >= 7}
 质量达标，结束。

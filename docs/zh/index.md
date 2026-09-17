@@ -23,13 +23,13 @@ ${:while ROUND < MAX}
     ${:new}
     ${:pass :write W}
     执行者（第 $(ROUND)/$(MAX) 轮）。新上下文——所需信息如下。
-    任务目标：$prompt
+    任务目标：$(prompt)
     只调用一次 pcl_write 写入：{"W": "行动摘要"}
 
     ${:new}
     ${:pass :write W}
     检查者（第 $(ROUND)/$(MAX) 轮）。新上下文——依以下证据判断。
-    任务目标：$prompt
+    任务目标：$(prompt)
     只调用一次 pcl_write 写入：{"W": {"done": true/false, "note": "理由"}}
 
     ${:if isinstance(W, dict) and W.get("done")}

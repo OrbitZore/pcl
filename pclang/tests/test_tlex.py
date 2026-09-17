@@ -35,27 +35,24 @@ def kinds(src: str) -> list[str]:
 def test_escape_dollar_forms():
     # 无尾换行的单行源：末尾不补换行（§4.4）
     assert texts("$${") == ["${"]
-    assert texts("$$prompt") == ["$prompt"]
     assert texts("$$$$") == ["$$"]
     assert texts("$$(") == ["$("]
-    # $$$prompt → 字面 $ + 裸糖 $prompt
-    ts = toks("$$$prompt")
-    assert isinstance(ts[0], TextTok) and ts[0].text == "$"
-    assert isinstance(ts[1], InterpTok) and ts[1].content == "prompt"
+    # $$prompt → 字面 "$prompt" 文本（转义优先，不触发 L103）
+    assert texts("$$prompt") == ["$prompt"]
 
 
-def test_bare_sugar_only_prompt():
-    for src in ("$prompts", "$PROMPT", "$promptX", "$prompt_", "$_prompt"):
-        assert texts(src) == [src], src
-    assert texts("$") == ["$"]
-    assert texts("$x") == ["$x"]
-    # $prompt 取最长标识符：$prompté 不触发
+def test_bare_sugar_removed():
+    # 裸糖 $prompt 已移除（rfc-0000-r1）→ L103 显式迁移错误
+    assert err_code("$prompt") == "L103"
+    assert err_code("x $prompt y") == "L103"
+    # 最长标识符匹配：$prompté 不报（仍是普通文本）
     assert texts("$prompté") == ["$prompté"]
 
 
-def test_bare_sugar_is_merge_form():
-    (it,) = interps("$prompt")
-    assert it.form == "(" and it.content == "prompt"
+def test_dollar_nonsugar_forms_untouched():
+    # 非糖形式：$+其他标识符/孤立 $ 仍为普通文本
+    for src in ("$prompts", "$PROMPT", "$promptX", "$prompt_", "$_prompt", "$", "$x"):
+        assert texts(src) == [src], src
 
 
 def test_dollar_untouched_inside_construct():

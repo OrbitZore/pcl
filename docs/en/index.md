@@ -29,14 +29,14 @@ ${:while ROUND < MAX}
     ${:pass :write W}
     Executor (round $(ROUND)/$(MAX)). Fresh context — everything you
     need is below.
-    Task goal: $prompt
+    Task goal: $(prompt)
     Call pcl_write exactly once with: {"W": "one-line action summary"}
 
     ${:new}
     ${:pass :write W}
     Inspector (round $(ROUND)/$(MAX)). Fresh context — judge from the
     evidence below.
-    Task goal: $prompt
+    Task goal: $(prompt)
     Call pcl_write exactly once with:
     {"W": {"done": true/false, "note": "one-line verdict"}}
 

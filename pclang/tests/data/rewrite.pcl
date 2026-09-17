@@ -6,7 +6,7 @@ ${HISTORY = []}
 ${:function attempt}
     ${:pass :write SCORE}
         请就以下主题写一段话（第 $(len(HISTORY) + 1) 次尝试），完成后调用 pcl_write 把自评质量分（0..10 整数）写入 SCORE：
-        $prompt
+        $(prompt)
     ${:return SCORE}
 ${:endfunction}
 

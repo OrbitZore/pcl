@@ -40,7 +40,7 @@ You just used PCL's core ideas:
 
 - `${…}` holds **real Python statements** (assignments, imports, anything)
 - `$(…)` weaves an expression's value **into the text**
-- `$prompt` is the first positional argument (bare sugar ≡ `$(prompt)`)
+- `$(prompt)` is the first positional argument (`pcl run x.pcl "task"` → `prompt = "task"`)
 
 ## Add an agent: one pass
 
@@ -53,7 +53,7 @@ ${SCORE = 0}
 ${:pass :write SCORE}
 Write one sentence about the topic, then call pcl_write with your
 self-rated quality score (0-10 integer) written to SCORE:
-$prompt
+$(prompt)
 
 ${:if SCORE >= 7}
 ✔ Quality passed ($(SCORE))

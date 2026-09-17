@@ -38,7 +38,7 @@ pcl run hello.pcl "PCL"
 
 - `${…}` 里是**真 Python 语句**（赋值、import 都行）
 - `$(…)` 把 Python 表达式的值**织入文本**
-- `$prompt` 是模板收到的第一个位置参数（裸糖，等价 `$(prompt)`）
+- `$(prompt)` 是模板收到的第一个位置参数（`pcl run x.pcl "任务"` → `prompt = "任务"`）
 
 ## 加上 agent：一个 pass
 
@@ -50,7 +50,7 @@ ${SCORE = 0}
 
 ${:pass :write SCORE}
 请就以下主题写一句话，并把自评质量分（0-10 整数）调用 pcl_write 写入 SCORE：
-$prompt
+$(prompt)
 
 ${:if SCORE >= 7}
 ✔ 质量达标（$(SCORE) 分）

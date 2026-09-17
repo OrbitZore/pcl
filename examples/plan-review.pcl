@@ -13,7 +13,7 @@ ${:while ROUND < MAX}
     ${:new}
     ${:pass :write W}
     Planner (round $(ROUND)/$(MAX)).
-    Task: $prompt
+    Task: $(prompt)
     Current plan:
     $(PLAN if PLAN else "(empty — write the first draft)")
     Revise it (goal / steps / risks & mitigations / acceptance criteria)
@@ -26,7 +26,7 @@ ${:while ROUND < MAX}
     ${PLAN = W if isinstance(W, str) else str(W)}
     ${:pass :write W}
     Reviewer (round $(ROUND)/$(MAX)).
-    Task: $prompt
+    Task: $(prompt)
     Plan under review:
     $(PLAN)
     Score 0-10 (10 = complete, actionable, no gaps). Call pcl_write

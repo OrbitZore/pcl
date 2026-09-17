@@ -28,7 +28,7 @@ def write(path: Path, text: str) -> Path:
 def test_hook_import_and_alias(on_path):
     write(on_path / "greet.pcl",
           '${GREETING = "hello"}\n'
-          '${:function greet}\n$(GREETING.title()), $prompt!\n${:endfunction}\n')
+          '${:function greet}\n$(GREETING.title()), $(prompt)!\n${:endfunction}\n')
     install_importer()
     import greet as g
     assert g.GREETING == "hello"
@@ -73,7 +73,7 @@ def test_import_never_runs_template_body(on_path, capsys):
 
 def test_dsl_to_dsl_import(on_path):
     write(on_path / "helpers.pcl",
-          '${TITLE = "lib"}\n${:function shout}\n$(TITLE): $prompt\n${:endfunction}\n')
+          '${TITLE = "lib"}\n${:function shout}\n$(TITLE): $(prompt)\n${:endfunction}\n')
     write(on_path / "main.pcl",
           "${import helpers as h}\n${x = h.TITLE}\nR=$(x)\n")
     result = run_program(str(on_path / "main.pcl"), "", agent="null",

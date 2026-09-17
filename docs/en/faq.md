@@ -47,10 +47,10 @@ back to template lines too.
 `$(@ @)` injections). Feature, not bug: post-`:new` prompts must be
 self-contained. Drop `:new` to keep history.
 
-## What is `$prompt`?
+## What is `$(prompt)`?
 
 The first positional argument: `pcl run x.pcl "task"` →
-`prompt = "task"`. Bare sugar `$prompt` ≡ `$(prompt)`; default `""`.
+`prompt = "task"`. Bare sugar `$(prompt)` ≡ `$(prompt)`; default `""`.
 
 ## Dicts print as JSON in output?
 

@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+### 变更（破坏性）
+
+- **移除 `$prompt` 裸糖**（[rfc-0000-r1](rfc/rfc-0000-r1-remove-bare-sugar.zh.md)）：
+  模板内注入 prompt 一律 `$(prompt)`；源码出现 `$prompt` 报 **L103**
+  （消息含迁移指引）。`$prompts`/`$$prompt` 等非精确匹配不受影响。
+  仓库内模板与文档已全量替换
+
 ### 变更
 
 - **发布序列调整为 alpha 起步**：计划首发 `0.2.0a1`（PEP 440 alpha），此后

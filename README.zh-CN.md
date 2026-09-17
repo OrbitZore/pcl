@@ -32,7 +32,7 @@ ${:while ROUND < MAX}
     ${:new}
     ${:pass :write W}
     执行者（第 $(ROUND)/$(MAX) 轮）。新上下文——所需信息如下。
-    任务目标：$prompt
+    任务目标：$(prompt)
     已有行动：
     $(HISTORY if HISTORY else "（无——第 1 轮）")
     采取下一步行动，然后只调用一次 pcl_write 写入：
@@ -42,7 +42,7 @@ ${:while ROUND < MAX}
     ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
     ${:pass :write W}
     检查者（第 $(ROUND)/$(MAX) 轮）。新上下文——依以下证据判断。
-    任务目标：$prompt
+    任务目标：$(prompt)
     已有行动：
     $(HISTORY)
     只调用一次 pcl_write 写入：

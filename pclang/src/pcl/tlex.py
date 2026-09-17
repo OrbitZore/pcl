@@ -1,7 +1,7 @@
 """tlex — PCL 模板词法（RFC 0000 §4）。
 
 职责：
-- ``$$`` 转义（单遍成对消解）与裸糖 ``$prompt``（≡ ``$(prompt)``）；
+- ``$$`` 转义（单遍成对消解）；``$prompt`` 裸糖已移除（L103，rfc-0000-r1）；
 - 构造识别：插值双形式 ``${}`` / ``$()``、指令 ``${:动词 …}``、注释 ``${:# …}``；
 - 闭合 = 括号配平（基于 :mod:`tokenize` 增量扫描，字符串/注释感知；
   ``${}`` 按 ``}``、``$()`` 按 ``)`` 闭合）；
@@ -25,7 +25,7 @@ from .errors import PclCompileError
 # ASCII 空白集（剥除用，RFC 0000 §4.4：仅空格与制表符）
 STRIP_WS = " \t"
 
-# 完整标识符（unicode 感知），用于裸糖 $prompt 的最长匹配
+# 完整标识符（unicode 感知），用于 $prompt 的最长匹配（裸糖已移除，仅剩报错路径）
 _IDENT_RE = re.compile(r"[^\W\d]\w*", re.UNICODE)
 _DELIM_MARKER_RE = re.compile(r"(\w+)([#@])")
 
@@ -253,12 +253,11 @@ class _Scanner:
                     i = self._construct(i)
                     continue
                 m = _IDENT_RE.match(src, i + 1)
-                if m and m.group() == "prompt":  # 裸糖 $prompt ≡ $(prompt)
+                if m and m.group() == "prompt":  # 裸糖已移除（rfc-0000-r1）
                     row, col = self.rowcol(i)
-                    stmts = parse_interp_content("prompt", self.file, row, col + 1)
-                    self.items.append(_InterpItem(InterpTok("(", "prompt", stmts, row, col + 1)))
-                    i = m.end()
-                    continue
+                    raise PclCompileError(
+                        "L103", "裸糖 $prompt 已移除：请改用 $(prompt)",
+                        file=self.file, line=row, col=col + 1)
                 self._text("$", i)  # 其余 $ 为普通字符
                 i += 1
                 continue

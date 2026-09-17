@@ -13,7 +13,6 @@ User-facing quick reference. Full normative spec:
 | Comment | `${:# …}` / `${# …}` | discarded to EOL; **own line only** |
 | Note | `$(# … #)` | rendered via note() — never enters LLM context |
 | Context injection | `$(@ … @)` | standalone user message into the session — no inference |
-| Bare sugar | `$prompt` | ≡ `$(prompt)` |
 | Escape | `$$` | literal `$` |
 
 **Extended delimiters**: `$(end# body containing #) literal #end)` —

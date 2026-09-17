@@ -50,7 +50,6 @@ cost, zero ecosystem loss, tracebacks pointing back at template lines.
 | **Comment** | `${:# …}` / `${# …}` | Line-delimited (discarded to EOL); must be alone on its line (C305) |
 | **Note** | `$(# … #)` | Full template body (recursively tokenized); rendered via `note()` — never enters LLM context |
 | **Context injection** | `$(@ … @)` | Full template body; rendered as a standalone user message injected into the agent session — no LLM inference triggered |
-| **Bare sugar** | `$prompt` | In text position ≡ `$(prompt)` (`$` + full identifier exactly `prompt`) |
 | **Escape** | `$$` | → literal `$` (single-pass pairwise) |
 
 **Extended delimiters** (when the body contains a literal closer;
@@ -174,11 +173,18 @@ ${:pass :read CTX :write SCORE}
 - `:function` names `main` / `prompt` / `reply` reserved → C300
 - The `__pcl_` prefix is reserved
 
+## Revision History
+
+| Rev | Date | Notes |
+|---|---|---|
+| r0 | 2026-09-17 | initial (included the `$prompt` bare sugar) |
+| [r1](rfc-0000-r1-remove-bare-sugar.md) | 2026-09-17 | **bare sugar removed** — `$prompt` → `$(prompt)` (L103 migration error); construct-table row dropped |
+
 ## Error Codes & Exit Codes
 
 | Class | Codes | Exit | Meaning |
 |---|---|---|---|
-| L | L100–L102 | 1 | Lexical (source/decoding) |
+| L | L100–L103 | 1 | Lexical (source/decoding/bare-sugar migration) |
 | P | P200–P203 | 1 | Parse (block pairing/args/pass body) |
 | C | C300/C305/C310 | 1 | Compile constraints (reserved names/comment placement/generated-source check) |
 | R | R400/R405/R406/R409/R430/R431 | 2 | Runtime (evaluation/write-back/authorization/interrupt/context) |

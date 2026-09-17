@@ -32,7 +32,7 @@ ${:while ROUND < MAX}
     ${:new}
     ${:pass :write W}
     Executor (round $(ROUND)/$(MAX)). Fresh context — everything you need is below.
-    Task goal: $prompt
+    Task goal: $(prompt)
     Actions so far:
     $(HISTORY if HISTORY else "(none yet — round 1)")
     Take the next action, then call pcl_write exactly once with:
@@ -42,7 +42,7 @@ ${:while ROUND < MAX}
     ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
     ${:pass :write W}
     Inspector (round $(ROUND)/$(MAX)). Fresh context — judge from the evidence below.
-    Task goal: $prompt
+    Task goal: $(prompt)
     Actions so far:
     $(HISTORY)
     Call pcl_write exactly once with:

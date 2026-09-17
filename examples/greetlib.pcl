@@ -3,5 +3,5 @@ ${:# 共享库：只含定义（加载层），import 永不触发 agent}
 ${TITLE = "PCL 示例库"}
 
 ${:function greet}
-[$(TITLE)] Hello, $prompt!
+[$(TITLE)] Hello, $(prompt)!
 ${:endfunction}

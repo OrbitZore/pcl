@@ -58,7 +58,7 @@ def test_usage_error_exit_1(capsys):
 # ---- run：prompt 拼接 / --var / -o / 退出码 --------------------------------------
 
 def test_run_prompt_joining(capsys, tmp_path, tmp_pcl):
-    p = tmp_pcl("P=[$prompt]\n")
+    p = tmp_pcl("P=[$(prompt)]\n")
     code, out, _ = run_cli(["run", str(p), "hello", "world", "--agent", "null",
                             "--cache", str(tmp_path / "c")], capsys)
     assert code == 0
@@ -66,7 +66,7 @@ def test_run_prompt_joining(capsys, tmp_path, tmp_pcl):
 
 
 def test_run_prompt_option_and_dashdash(capsys, tmp_path, tmp_pcl):
-    p = tmp_pcl("P=[$prompt]\n")
+    p = tmp_pcl("P=[$(prompt)]\n")
     code, out, _ = run_cli(["run", str(p), "--prompt", "opt", "--agent", "null",
                             "--cache", str(tmp_path / "c")], capsys)
     assert out == "P=[opt]\n"
@@ -178,7 +178,7 @@ def write_user_settings(env, text):
 
 
 def test_settings_agent_fallback_and_override(capsys, settings_env, tmp_pcl):
-    p = tmp_pcl("A=[$prompt]\n")
+    p = tmp_pcl("A=[$(prompt)]\n")
     # 设置文件给默认 agent=null（无 CLI 旗标 → 生效）
     write_user_settings(settings_env, '{"agent": "null"}')
     code, out, _ = run_cli(["run", str(p), "hi"], capsys)
@@ -258,7 +258,7 @@ def test_no_project_config_flag(capsys, settings_env, tmp_path, tmp_pcl):
     (tmp_path / ".pcl" / "settings.json").write_text(
         '{"agent": "script"}', encoding="utf-8")
     entry = tmp_path / "t.pcl"
-    entry.write_text("A=[$prompt]\n", encoding="utf-8")
+    entry.write_text("A=[$(prompt)]\n", encoding="utf-8")
     code, out, err = run_cli(["run", str(entry), "hi"], capsys)
     assert code == 3 and "A500" in err
     # --no-project-config：项目级被跳过 → 用户级 null 生效
@@ -271,7 +271,7 @@ def test_library_form_unaffected_by_settings(settings_env, tmp_pcl):
     # 库形态不读设置：显式参数直通，设置文件存在与否结果一致
     import pcl
     write_user_settings(settings_env, '{"agent": "null", "timeout": 1}')
-    p = tmp_pcl("L=[$prompt]\n")
+    p = tmp_pcl("L=[$(prompt)]\n")
     r1 = pcl.run_program(str(p), "hi", agent="null", cache_dir=None)
     (settings_env / "xdg" / "pcl" / "settings.json").unlink()
     r2 = pcl.run_program(str(p), "hi", agent="null", cache_dir=None)
@@ -284,8 +284,8 @@ def test_shebang_direct_execution(capsys, tmp_path, tmp_pcl):
     """`#!/usr/bin/env pcl` + chmod +x → ./script.pcl [args] 直接运行。"""
     import stat as stat_mod
 
-    p = tmp_pcl("S=[$prompt]\n")
-    p.write_text("#!/usr/bin/env pcl\nS=[$prompt]\n", encoding="utf-8")
+    p = tmp_pcl("S=[$(prompt)]\n")
+    p.write_text("#!/usr/bin/env pcl\nS=[$(prompt)]\n", encoding="utf-8")
     p.chmod(p.stat().st_mode | stat_mod.S_IEXEC)
     code, out, _ = run_cli([str(p), "hello", "--agent", "null",
                             "--cache", "none"], capsys)
