@@ -17,7 +17,7 @@ The pass body renders **before** the commit — the write-back hasn't
 happened yet. Put post-processing outside the pass body, past the next
 directive (e.g. after `${:new}`/`${:if}`), or use a `:if` condition
 expression (evaluated post-writeback). See [Guide · post-writeback
-processing](guide.md#post-writeback-processing-the-directive-boundary).
+processing](guide.md#Post-writeback-processing-the-directive-boundary).
 
 ## C305: comment must be alone?
 
@@ -68,7 +68,7 @@ cross-cwd rejection. See
 ## Exit codes 1/2/3?
 
 1 = compile-time (L/P/C), 2 = runtime (R), 3 = bridge (A),
-130 = interrupt. Full table in the [Language Reference](language.md#error-codes).
+130 = interrupt. Full table in the [Language Reference](language.md#Error-codes).
 
 ## How do I contribute a feature?
 

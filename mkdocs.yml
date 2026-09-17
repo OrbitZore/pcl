@@ -7,7 +7,6 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
-  language: en
   palette:
     - scheme: default
       primary: indigo
@@ -29,6 +28,19 @@ theme:
     - search.highlight
     - search.share
 
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: en
+          name: English
+          default: true
+          build: true
+        - locale: zh
+          name: 简体中文
+          build: true
+
 markdown_extensions:
   - admonition
   - pymdownx.details
@@ -41,25 +53,15 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+      slugify: !!python/name:pymdownx.slugs._uslugify
 
 nav:
-  - 中文文档:
-    - 首页: zh/index.md
-    - 快速开始: zh/quickstart.md
-    - 核心指南: zh/guide.md
-    - 语言参考: zh/language.md
-    - CLI 手册: zh/cli.md
-    - 设置: zh/settings.md
-    - 示例: zh/examples.md
-    - FAQ: zh/faq.md
-    - 更新日志: zh/changelog.md
-  - English:
-    - Home: en/index.md
-    - Quickstart: en/quickstart.md
-    - Guide: en/guide.md
-    - Language Reference: en/language.md
-    - CLI Manual: en/cli.md
-    - Settings: en/settings.md
-    - Examples: en/examples.md
-    - FAQ: en/faq.md
-    - Changelog: en/changelog.md
+  - Home: en/index.md
+  - Quickstart: en/quickstart.md
+  - Guide: en/guide.md
+  - Language Reference: en/language.md
+  - CLI Manual: en/cli.md
+  - Settings: en/settings.md
+  - Examples: en/examples.md
+  - FAQ: en/faq.md
+  - Changelog: en/changelog.md

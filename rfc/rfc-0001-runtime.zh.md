@@ -4,6 +4,7 @@ Title: PCL Runtime Definition
 Status: Implemented
 Type: Standards Track
 Created: 2026-09-17
+Language: 中文（权威稿；英文镜像见同名 .md）
 Implementation: pclang ≥ 0.2.0
 ---
 

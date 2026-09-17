@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pclang"                     # PyPI 分发名（`pcl` 已被占位包占用）；import 名仍为 pcl
-version = "0.2.0.dev0"
+dynamic = ["version"]       # 单源：src/pcl/_version.py（package.json 由 CI 守护一致）
 description = "PCL — Prompt Control Language：编排 LLM/agent 的模板 DSL（模板层是 PCL，脚本层是真 Python）"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,6 +25,9 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Topic :: Software Development :: Code Generators",
 ]
+
+[tool.setuptools.dynamic]
+version = { attr = "pcl._version.__version__" }
 
 [project.scripts]
 pcl = "pcl.cli:main"

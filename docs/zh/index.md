@@ -62,7 +62,7 @@ pcl run goal.pcl "创建 hello.txt，内容为 Hello PCL"
 - 首个适配 agent：[pi](https://github.com/earendil-works/pi-coding-agent)
   （正向 CLI + 会话内 `/pcl` 嵌入双形态）
 - 语言规范与实现契约：[RFC 目录](https://github.com/OrbitZore/pcl/tree/main/rfc)
-- 参与贡献：[CONTRIBUTING](https://github.com/OrbitZore/pcl/blob/main/CONTRIBUTING.md)
+- 参与贡献：[CONTRIBUTING](https://github.com/OrbitZore/pcl/blob/main/CONTRIBUTING.zh-CN.md)
 
 ## 许可证
 

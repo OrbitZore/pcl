@@ -1,5 +1,14 @@
 # PCL RFCs
 
+> **中文说明**：本目录是面向开发者的规范文档（RFC 范式）。每份 RFC
+> 维护中英双版本：`rfc-NNNN-<topic>.zh.md` 为**权威稿**（先写、随实现
+> 同步），`rfc-NNNN-<topic>.md` 为英文镜像；分歧即 bug。新 feature
+> 必须先提交 RFC——流程见
+> [CONTRIBUTING.zh-CN.md](../CONTRIBUTING.zh-CN.md)。用户文档在
+> [docs/](../docs/)（注意：仓库根 `README.zh-CN.md`/`CONTRIBUTING.zh-CN.md`
+> 用 GitHub 可识别的 `.zh-CN` 后缀，本目录为紧凑起见用 `.zh`——两处
+> 指同一语言变体）。
+
 This directory holds the **normative specifications** of PCL, written for
 **language implementers and connector developers**. User-facing
 documentation lives in [`docs/`](../docs/).

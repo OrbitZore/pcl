@@ -35,6 +35,12 @@ Implementation: <none | pclang ≥ x.y.z>
 
 评审时待定的问题（Accepted 前必须清空）。
 
+## Revision History
+
+| 修订 | 日期 | 说明 |
+|---|---|---|
+| r0 | YYYY-MM-DD | 首稿 |
+
 ## References
 
 - 相关 RFC / 文档 / 实现

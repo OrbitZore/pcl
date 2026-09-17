@@ -1,6 +1,6 @@
 # PCL — Prompt Control Language
 
-**English** | [简体中文](README.zh_CN.md)
+**English** | [简体中文](README.zh-CN.md)
 
 A template DSL for orchestrating LLM agents: **the template layer is PCL, the script layer is real Python**.
 
@@ -61,6 +61,17 @@ ${:if DONE}
 $(# 🎉 Goal achieved in round $(ROUND)/$(MAX)#)
 ${:fi}
 ```
+
+## Stability
+
+Pre-1.0, starting from alpha (`0.2.0a1` — see the
+[versioning plan](CONTRIBUTING.md#versioning-plan)):
+
+- **The syntax shown in this README is the stable surface** — no
+  breaking changes during alpha
+- Language details beyond it (full definition:
+  [RFC 0000](rfc/rfc-0000-language.md)) may evolve
+- Connector protocol versions align via the `pcl version` handshake
 
 ## Install
 
@@ -130,7 +141,7 @@ ruff check src tests                # lint
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines (Chinese edition: [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)).
 
 ## License
 

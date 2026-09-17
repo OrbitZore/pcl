@@ -67,4 +67,4 @@ auto-follow、绑定降级 A523、跨 cwd 拒绝。详见
 ## 如何贡献新特性？
 
 先写 RFC——见
-[CONTRIBUTING](https://github.com/OrbitZore/pcl/blob/main/CONTRIBUTING.md)。
+[CONTRIBUTING](https://github.com/OrbitZore/pcl/blob/main/CONTRIBUTING.zh-CN.md)。

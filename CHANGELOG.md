@@ -1,13 +1,27 @@
 # 更新日志
 
 本项目的全部显著变更记录于此。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
-版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)；发布序列从 **alpha** 起步
+（版本计划见 [CONTRIBUTING](CONTRIBUTING.zh-CN.md#versioning-plan版本号计划)）。
+
+## [Unreleased]
+
+### 变更
+
+- **发布序列调整为 alpha 起步**：计划首发 `0.2.0a1`（PEP 440 alpha），此后
+  `0.2.0aN → 0.2.0bN → 0.2.0rcN → 0.2.0`；此前开发版本号 `0.2.0.dev0`
+  不再发布
+- 许可证 MIT → **GPL-3.0-or-later**
+- 规范文档体系重组：`docs/dsl.md`+`docs/design.md` → [rfc/](rfc/)
+  （0000 语言 / 0001 执行层 / 0002 连接器，中英双语）；用户文档重组为
+  [docs/zh](docs/zh) + [docs/en](docs/en)
+- 连接器 `~/.pcl/bin/` 自动命令改为一律 embedded（从不 spawn）
 
 ## [0.2.0.dev0] - 2026-09-16
 
 ### 新增
 
-- **设置文件（用户级/项目级）**（[docs/SETTINGS.md](docs/SETTINGS.md)）：
+- **设置文件（用户级/项目级）**（规范：[RFC 0001 §8](rfc/rfc-0001-runtime.zh.md)；用户文档：[docs/zh/settings.md](docs/zh/settings.md)）：
   - `pcl/settings.py`：JSONC 子集（字符串外注释与尾随逗号，stdlib 剥离且
     行号不失真）；发现（`$PCL_CONFIG_FILE`/XDG 用户级；入口 `.pcl` 向上最近
     `.pcl/settings.json` 项目级；`PCL_NO_PROJECT_CONFIG`）；合并（内置 ←

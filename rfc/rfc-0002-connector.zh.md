@@ -4,6 +4,7 @@ Title: PCL Connector Definition
 Status: Implemented
 Type: Standards Track
 Created: 2026-09-17
+Language: 中文（权威稿；英文镜像见同名 .md）
 Implementation: pcl-connector/pi ≥ 0.2.0
 ---
 

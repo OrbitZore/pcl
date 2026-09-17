@@ -62,6 +62,15 @@ $(# 🎉 目标在第 $(ROUND)/$(MAX) 轮达成#)
 ${:fi}
 ```
 
+## 稳定性
+
+1.0 之前，从 alpha 起步（`0.2.0a1`，见
+[版本号计划](CONTRIBUTING.zh-CN.md#versioning-plan版本号计划)）：
+
+- **本 README 展示的语法子集 = 稳定面**——alpha 期间不发生破坏性变更
+- 超出部分（完整定义：[RFC 0000](rfc/rfc-0000-language.zh.md)）可能演进
+- 连接器协议经 `pcl version` 握手对齐版本
+
 ## 安装
 
 ```bash
@@ -130,7 +139,7 @@ ruff check src tests                # 代码检查
 
 ## 贡献
 
-参见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+参见 [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)（English: [CONTRIBUTING.md](CONTRIBUTING.md)）。
 
 ## 许可
 

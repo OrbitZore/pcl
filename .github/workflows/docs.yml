@@ -1,0 +1,24 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install docs deps
+        run: pip install mkdocs-material mkdocs-static-i18n
+      - name: Build (strict) — catches broken links / nav drift
+        run: mkdocs build --strict
+      - name: Deploy to GitHub Pages
+        run: mkdocs gh-deploy --force --no-history

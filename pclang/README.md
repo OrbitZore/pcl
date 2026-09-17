@@ -38,7 +38,7 @@ pcl check demo.pcl                          # 编译 + 语法检查
 
 ## pi 连接器（正向 `--agent pi`）
 
-主包不含连接器（拆包分发；多后端连接器族见 [pcl-connector/](../pcl-connector/)）。安装三选一：
+主包不含连接器（拆包分发；多后端连接器族见 [pcl-connector/](https://github.com/OrbitZore/pcl/tree/main/pcl-connector/)）。安装三选一：
 
 1. **pi 包**：`pi install /path/to/pcl-connector/pi`（`pi -e` 同路径临时试用；`pi remove` 卸载）；
 2. **预装**：复制/链接 `pcl-connector/pi/extensions` 到 `~/.pi/agent/extensions/`——`--connector-path` 缺省 `none` 即用；
@@ -46,7 +46,7 @@ pcl check demo.pcl                          # 编译 + 语法检查
 
 ## 文档
 
-- 规范与实现契约：[RFC 0000 语言](../rfc/rfc-0000-language.zh.md) · [RFC 0001 执行层](../rfc/rfc-0001-runtime.zh.md) · [RFC 0002 连接器](../rfc/rfc-0002-connector.zh.md)
+- 规范与实现契约：[RFC 0000 语言](https://github.com/OrbitZore/pcl/blob/main/rfc/rfc-0000-language.zh.md) · [RFC 0001 执行层](https://github.com/OrbitZore/pcl/blob/main/rfc/rfc-0001-runtime.zh.md) · [RFC 0002 连接器](https://github.com/OrbitZore/pcl/blob/main/rfc/rfc-0002-connector.zh.md)
 
 ## 许可
 

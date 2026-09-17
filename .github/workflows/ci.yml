@@ -49,3 +49,28 @@ jobs:
           /tmp/fresh/bin/pcl version
           /tmp/fresh/bin/pcl check tests/data/demo.pcl --cache none
         working-directory: pclang
+
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Version single-source & bilingual pairing
+        run: |
+          python3 - <<'PY'
+          import json, re, sys
+          v = re.search(r'__version__ = "(.+?)"',
+                        open("pclang/src/pcl/_version.py").read()).group(1)
+          pkg = json.load(open("pcl-connector/pi/package.json"))["version"]
+          assert v == pkg, f"version drift: _version.py={v} package.json={pkg}"
+          import glob, os
+          zh = {os.path.basename(p) for p in glob.glob("docs/zh/*.md")}
+          en = {os.path.basename(p) for p in glob.glob("docs/en/*.md")}
+          assert zh == en, f"docs mismatch: zh-only={zh-en}, en-only={en-zh}"
+          rfc = {p.rsplit("/", 1)[1] for p in glob.glob("rfc/rfc-0*.md")}
+          for f in rfc:
+              if not f.endswith(".zh.md"):
+                  assert f"{f[:-3]}.zh.md" in rfc, f"RFC missing .zh edition: {f}"
+          print(f"ok: version={v}, docs paired, rfcs paired")
+          PY

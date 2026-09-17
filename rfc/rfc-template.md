@@ -36,6 +36,12 @@ Considered-and-rejected alternatives, with reasons.
 
 Open questions (must be empty before Accepted).
 
+## Revision History
+
+| Rev | Date | Notes |
+|---|---|---|
+| r0 | YYYY-MM-DD | initial draft |
+
 ## References
 
 - Related RFCs / docs / implementation
