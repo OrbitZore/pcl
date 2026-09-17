@@ -66,9 +66,9 @@ alpha 阶段保证不发生破坏性变更；超出 README 的语言细节（完
 RFC 0000）可能演进。连接器协议（RFC 0002）以 `pcl version` 握手
 信息对齐版本。
 
-版本号位置：`pclang/src/pcl/_version.py`、`pclang/pyproject.toml`、
-`pcl-connector/pi/package.json` 三处同步；发版时更新并打 tag
-（`v0.2.0a1` 格式）。
+版本单源：`pclang/src/pcl/_version.py`（pyproject 经 dynamic 读取；
+`pcl-connector/pi/package.json` 由 CI consistency job 守护一致）。发版时
+更新单源并打 tag（`v0.2.0a1` 格式）。
 
 ## Development Workflow
 
