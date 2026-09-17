@@ -23,17 +23,6 @@ jobs:
         with:
           packages-dir: pclang/dist/
 
-  # npm 连接器本地手动发布（2FA）；如配置 NPM_TOKEN secret 可启用本 job
-  npm:
-    if: ${{ secrets.NPM_TOKEN != '' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          registry-url: https://registry.npmjs.org
-      - run: npm publish --access public
-        working-directory: pcl-connector/pi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+# npm 连接器（pcl-connector-pi）由维护者本地发布（npm login + 2FA）：
+#   cd pcl-connector/pi && npm publish --access public
+# 如需 CI 发布，追加 job 并在仓库 Secrets 配置 NPM_TOKEN。
