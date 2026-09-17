@@ -7,6 +7,7 @@ on:
 
 jobs:
   pypi:
+    if: github.event_name == 'push'   # 仅 tag 首触发时上传；dispatch 补发不重复
     runs-on: ubuntu-latest
     permissions:
       id-token: write          # PyPI Trusted Publishing（OIDC，零密钥）
@@ -26,14 +27,17 @@ jobs:
 
   npm:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write          # npm Trusted Publishing（OIDC，零密钥）
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: https://registry.npmjs.org
-      - name: Publish pcl-connector-pi（未配置 NPM_TOKEN secret 时跳过）
-        if: ${{ secrets.NPM_TOKEN != '' }}      # step 级可访问 secrets（job 级不可）
+      - name: npm Trusted Publishing 需较新 CLI
+        run: npm install -g npm@latest
+      - name: Publish pcl-connector-pi
         run: |
           V=$(node -p "require('./package.json').version")
           if [[ "$V" == *-* ]]; then
@@ -42,5 +46,3 @@ jobs:
             npm publish --access public               # stable → latest
           fi
         working-directory: pcl-connector/pi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
