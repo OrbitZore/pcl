@@ -6,8 +6,8 @@ A template DSL for orchestrating LLM agents: **the template layer is PCL, the sc
 
 [![Docs](https://img.shields.io/badge/docs-orbitzore.github.io%2Fpcl-blue)](https://orbitzore.github.io/pcl/)
 [![CI](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml/badge.svg)](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/pclang.svg)](https://pypi.org/project/pclang/)
-[![Python](https://img.shields.io/pypi/pyversions/pclang.svg)](https://pypi.org/project/pclang/)
+[![PyPI](https://img.shields.io/pypi/v/pclang.svg?v=1)](https://pypi.org/project/pclang/)
+[![Python](https://img.shields.io/pypi/pyversions/pclang.svg?v=1)](https://pypi.org/project/pclang/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ---
