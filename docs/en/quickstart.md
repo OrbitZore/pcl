@@ -107,7 +107,7 @@ chmod +x ~/.pcl/bin/score.pcl
 # after restarting pi: /pcl-score "Why is the sky blue"
 ```
 
-See [Guide · two pi integrations](guide.md#two-pi-integrations).
+See [Guide · two pi integrations](guide.md#Two-pi-integrations).
 
 ## Next
 
