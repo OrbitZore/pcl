@@ -1,6 +1,6 @@
 # pcl-connector — PCL 的 agent 后端连接器族
 
-PCL 的桥接层抽象为多 agent 后端做准备（DESIGN §3：**其他 agent 工具只增适配子包**）。
+PCL 的桥接层抽象为多 agent 后端做准备（RFC 0001 §6：**其他 agent 工具只增适配子包**）。
 每个子包是独立分发的 pi-package 风格扩展包，与 Python 主包（`pclang`）拆包发布、互不依赖。
 
 ## 后端子包

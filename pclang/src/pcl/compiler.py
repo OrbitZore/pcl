@@ -1,4 +1,4 @@
-"""compiler — 编译管线与生成源缓存（DESIGN §5.3 / A11）。
+"""compiler — 编译管线与生成源缓存（RFC 0001 §5.3 / A11）。
 
 - ``compile_source``：模板文本 → 生成 Python 源（含 ``compile()`` 语法检查 → C310）；
 - ``compile_file``：读取（UTF-8、BOM 剥除 → L102）→ compile_source；

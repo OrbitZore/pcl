@@ -1,4 +1,4 @@
-"""cli — pcl 命令行入口（DESIGN §10，DSL §11；设置文件见 docs/SETTINGS.md）。
+"""cli — pcl 命令行入口（RFC 0001 §10，RFC 0000 §11；设置文件见 docs/SETTINGS.md）。
 
 ``pcl run / gen / check / config / version``；退出码：0 成功；1 编译期（L/P/C）
 与用法错（argparse 默认 2 覆写为 1）及**设置错误**；2 运行期（R）；3 桥接（A）；

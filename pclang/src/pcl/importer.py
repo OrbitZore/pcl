@@ -1,4 +1,4 @@
-"""importer — .pcl 模块化互操作（DSL §9.3，DESIGN §3/A11/A12）。
+"""importer — .pcl 模块化互操作（RFC 0000 §9.3，RFC 0001 §3/A11/A12）。
 
 - ``install_importer()``：meta path finder（追加在 PathFinder 之后）——
   仅当常规路径查找失败（返回 None）时才接手查找 ``<name>.pcl``，

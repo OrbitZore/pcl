@@ -1,6 +1,6 @@
 """pcl — Prompt Control Language（模板层 PCL，脚本层 Python）。
 
-公共 API（DESIGN §6/A12）：
+公共 API（RFC 0001 §6/A12）：
 - ``compile_program(path) -> str``：编译返回生成源文本，不执行；
 - ``run_program(path, prompt, *, agent=...) -> RunResult``：完整执行；
 - ``Run / RunResult / PassResult / PclError / PclCompileError``；

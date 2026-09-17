@@ -1,4 +1,4 @@
-"""importer 测试：hook、双向 import、.py 优先、加载层、隔离（DSL §9.3）。"""
+"""importer 测试：hook、双向 import、.py 优先、加载层、隔离（RFC 0000 §9）。"""
 
 from __future__ import annotations
 

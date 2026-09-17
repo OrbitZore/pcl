@@ -1,4 +1,4 @@
-"""tparse — PCL AST（dataclass）、块配对与静态检查（DESIGN §5.1，DSL §6/§9.2）。
+"""tparse — PCL AST（dataclass）、块配对与静态检查（RFC 0001 §5.1，RFC 0000 §6/§9.2）。
 
 Token 流（tlex）→ 嵌套节点树：
 - Text / Interp（双形式，含原样语句列表）
@@ -13,7 +13,7 @@ Token 流（tlex）→ 嵌套节点树：
 - P202 pass 体为空；P203 pass 体内插值含 break/continue/return
 - C300 保留名绑定（8 个运行时名与 __pcl_ 前缀；:function 名 main/prompt/reply）、
   非提升位置 ``import *``
-- 加载层提升判定（DSL §9.2：整体为 import / 字面量赋值）
+- 加载层提升判定（RFC 0000 §9.2：整体为 import / 字面量赋值）
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from .errors import PclCompileError
 from .tlex import ContextTok, DirTok, InterpTok, NoteTok, TextTok
 
-# 运行时保留名（DSL §9.2：9 名一律保留，无论是否用到；note 为 v0.2 新增）
+# 运行时保留名（RFC 0000 §9.2：9 名一律保留，无论是否用到；note 为 v0.2 新增）
 RUNTIME_RESERVED = frozenset({
     "emit", "text", "submit", "save", "load",
     "new_ctx", "push_sink", "pop_sink", "note",
@@ -202,7 +202,7 @@ def binding_names(stmts, *, include_ann: bool = True) -> set[str]:
 
 
 def _is_literal_value(v) -> bool:
-    """字面量 / 纯字面量容器 / 数值字面量的一元 ±~（DSL §9.2）。"""
+    """字面量 / 纯字面量容器 / 数值字面量的一元 ±~（RFC 0000 §9.2）。"""
     if isinstance(v, ast.Constant):
         return True
     if isinstance(v, (ast.Tuple, ast.List, ast.Set)):
@@ -214,7 +214,7 @@ def _is_literal_value(v) -> bool:
 
 
 def _is_promotable_stmts(stmts) -> bool:
-    """语句列表整体为 import / 字面量赋值（可提升至加载层，DSL §9.2）。"""
+    """语句列表整体为 import / 字面量赋值（可提升至加载层，RFC 0000 §9.2）。"""
     for st in stmts:
         if isinstance(st, (ast.Import, ast.ImportFrom)):
             continue

@@ -1,4 +1,4 @@
-"""tlex — PCL 模板词法（DSL §4）。
+"""tlex — PCL 模板词法（RFC 0000 §4）。
 
 职责：
 - ``$$`` 转义（单遍成对消解）与裸糖 ``$prompt``（≡ ``$(prompt)``）；
@@ -7,7 +7,7 @@
   ``${}`` 按 ``}``、``$()`` 按 ``)`` 闭合）；
 - 跨行构造：仅三引号字符串吞并换行时合法（指令一律单行）；
 - 行首/行尾 ASCII 空白剥除（空格/制表符；``\\r`` 按行终止符处理）、
-  独行消除（行内全部构造无输出则整行移除，DSL §4.4）；
+  独行消除（行内全部构造无输出则整行移除，RFC 0000 §4.4）；
 - 注释整行消除（未独行 → C305）。
 
 输出：Token 流（Text / Interp / Directive / Comment 已消除不输出）。
@@ -22,7 +22,7 @@ from tokenize import NEWLINE, NL, OP, TokenError, generate_tokens
 
 from .errors import PclCompileError
 
-# ASCII 空白集（剥除用，DSL §4.4：仅空格与制表符）
+# ASCII 空白集（剥除用，RFC 0000 §4.4：仅空格与制表符）
 STRIP_WS = " \t"
 
 # 完整标识符（unicode 感知），用于裸糖 $prompt 的最长匹配
@@ -36,7 +36,7 @@ VERBS = frozenset({
     "pass", "save", "load", "new",
 })
 
-# 简单语句白名单（复合语句 → C300，DSL §10）
+# 简单语句白名单（复合语句 → C300，RFC 0000 §10）
 _SIMPLE_STMTS = (
     ast.Assign, ast.AugAssign, ast.AnnAssign, ast.Expr,
     ast.Import, ast.ImportFrom, ast.Delete,

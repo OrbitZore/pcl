@@ -88,7 +88,7 @@ def test_p203_pass_body_control_flow():
     assert code("${:if 1}${:pass}\n${break}\n${:fi}${:fi}") == "P203"
     assert code("${:if 1}${:pass}\n$(return 1)\n${:fi}${:fi}") == "P203"
     assert code("${:if 1}${:pass}\n$(continue)\n${:fi}${:fi}") == "P203"
-    # yield 不在拦截之列（生成器语义，DSL §7）
+    # yield 不在拦截之列（生成器语义，RFC 0000 §7）
     compile_source(
         "${:function f}${:pass}\n${(yield 1)}\n${:return}\n${:endfunction}", "t.pcl")
 
@@ -168,3 +168,20 @@ def test_empty_blocks():
 def test_note_reserved_name():
     assert code("${note = 1}") == "C300"               # note 为第 9 个运行时名
     compile_source("$(# 合法注记 #)\n", "t.pcl")
+
+
+def test_pass_body_note_context_regressions():
+    """回归：pass 体内 NoteTok/ContextTok 曾因 continue 缺 i+=1 死循环。"""
+    nodes = compile_source("${:pass}\nexec\n$(# note $(1) #)\n", "t.pcl")
+    # compile_source 返回 GenResult——直接断言编译通过且生成源含 note() 调用
+    assert "note" in nodes.source
+
+
+def test_pass_body_note_then_directive_terminates():
+    """回归：note 在 pass 体内，下一个指令必须终止 pass 体（非死循环）。"""
+    compile_source("${:while 1}\n${:pass}\nexec\n$(# n #)\n${:break}\n${:done}", "t.pcl")
+
+
+def test_c305_indented_own_line_comment():
+    """回归：C305 曾在空白剥除之前检查——缩进独行注释被误报。"""
+    compile_source("${:while 1}\n    ${:# comment inside loop}\n${:done}", "t.pcl")

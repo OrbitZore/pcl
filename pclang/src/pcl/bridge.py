@@ -1,4 +1,4 @@
-"""bridge — IAgentBridge 抽象与 Null / Script 测试桥（DESIGN §7）。
+"""bridge — IAgentBridge 抽象与 Null / Script 测试桥（RFC 0001 §7）。
 
 PiBridge（pi 适配）属 M2，另行交付；embed 传输属 M3。
 """

@@ -1,11 +1,11 @@
-"""runtime — 运行时 API 与 Run 执行环境（DESIGN §6，DSL §9.1/§10）。
+"""runtime — 运行时 API 与 Run 执行环境（RFC 0001 §6，RFC 0000 §9.1/§10）。
 
 生成代码视角的 8 个入口：emit / text / submit / save / load / new_ctx /
 push_sink / pop_sink（+ 内部 ``__pcl_freeze``）。
 
 - 一切状态收敛在 ``Run`` 对象（contextvar 定位当前 Run；多 run 并存，A12）；
 - 无 Run 上下文调用任何运行时函数 → R405；
-- ``text()`` 按 DSL §10 规则字符串化；``__pcl_freeze`` 转 JSON-safe 值。
+- ``text()`` 按 RFC 0000 §10 规则字符串化；``__pcl_freeze`` 转 JSON-safe 值。
 """
 
 from __future__ import annotations
@@ -19,14 +19,14 @@ from typing import Any
 from .bridge import PassResult, make_bridge
 from .errors import PclCompileError, PclError
 
-# submit 前对 prompt 做 ASCII 空白双端剥除（DSL §7；全角空白不剥）
+# submit 前对 prompt 做 ASCII 空白双端剥除（RFC 0000 §7；全角空白不剥）
 _TRIM_WS = " \t\n\r\f\v"
 
-# 写回值 JSON 反序列化深度上限（DESIGN §6）
+# 写回值 JSON 反序列化深度上限（RFC 0001 §6）
 _MAX_JSON_DEPTH = 32
 
 
-# ---- text() 与 :read 冻结（DSL §10） --------------------------------------
+# ---- text() 与 :read 冻结（RFC 0000 §10） --------------------------------------
 
 def _freeze_value(v: Any, _seen: frozenset[int] | None = None) -> Any:
     """按 text() 同套规则转出 JSON-safe 值（容器结构保留，§7）。
@@ -81,7 +81,7 @@ def _dict_key(k: Any) -> str:
 
 
 def text(v: Any) -> str:
-    """DSL §10 字符串化。
+    """RFC 0000 §10 字符串化。
 
     str → 原样；dict/list/tuple → 紧凑 JSON（键按插入序，tuple 视作 list，
     不可 JSON 化的值与 NaN/Infinity 以 str() 兜底，整体失败退化 str(v)）；
@@ -110,7 +110,7 @@ def text(v: Any) -> str:
 
 
 def __pcl_freeze(v: Any) -> Any:
-    """:read 快照冻结（生成代码按需导入；DSL §7）。"""
+    """:read 快照冻结（生成代码按需导入；RFC 0000 §7）。"""
     return _freeze_value(v)
 
 
@@ -211,7 +211,7 @@ def _depth(v: Any, d: int = 1) -> int:
 
 def submit(prompt: str, reads: dict | None = None,
            writes: tuple[str, ...] = ()) -> PassResult:
-    """提交一轮 pass（DSL §7）。
+    """提交一轮 pass（RFC 0000 §7）。
 
     - prompt 先 ASCII 空白双端 trim；trim 后为空 → 跳过桥接、返回空结果；
     - 越权写入 → R406（先于空回复判定）；空回复 → A504；
@@ -273,7 +273,7 @@ def note(text: str) -> None:
         run.emit(text)
 
 
-# ---- run_program（公共 API，DESIGN §6） ----------------------------------
+# ---- run_program（公共 API，RFC 0001 §6） ----------------------------------
 
 def _parse_pcl_annotations(source: str) -> dict[int, int]:
     """解析生成源逐行尾注 ``# pcl:N`` / ``# pcl:N-M`` → {生成行: 模板行}。"""
@@ -304,7 +304,7 @@ def _module_annotations(module) -> dict[int, int]:
 
 
 def _translate_runtime_error(exc: BaseException, module, pcl_path) -> PclError:
-    """R400 包装：traceback 帧映射回 .pcl 行（DSL §11）。"""
+    """R400 包装：traceback 帧映射回 .pcl 行（RFC 0000 §11）。"""
     import os
 
     gen_path = str(getattr(module, "__pcl_genfile__", ""))
@@ -350,7 +350,7 @@ def run_program(path, prompt: str = "", *, agent: str = "pi",
     from .importer import install_importer as _install_importer
     from .tparse import RUNTIME_RESERVED as _RESERVED
 
-    # pcl run 内建 importer hook（DESIGN §3）：`${import helpers}` 等
+    # pcl run 内建 importer hook（RFC 0001 §3）：`${import helpers}` 等
     # DSL→DSL 导入经 sys.path[0]（源目录）解析——不依赖宿主预先 install_importer
     _install_importer()
 

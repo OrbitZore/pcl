@@ -1,4 +1,4 @@
-"""e2e（script/null 桥）：DSL §12 逐字节断言、reply 折叠、动态嵌套、A510。"""
+"""e2e（script/null 桥）：RFC 0000 §12 示例逐字节断言、reply 折叠、动态嵌套、A510。"""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def run_pcl(path, prompt="", **kw):
     return run_program(str(path), prompt, agent="null", **kw)
 
 
-# ---- DSL §12 完整示例 -------------------------------------------------------
+# ---- RFC 0000 §12 完整示例 -------------------------------------------------------
 
 def test_rewrite_example_byte_exact(tmp_path):
     script = tmp_path / "s.jsonl"

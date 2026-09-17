@@ -36,7 +36,7 @@
   - `cache.keep_per_stem` 设置项接入编译器缓存 GC
   - `python -m pcl` 等价 CLI（DESIGN A12 补齐）
   - 连接器 `/pcl config` 进直通命令族
-- **模糊测试**（DESIGN §11）：自写 fuzzer、零依赖、固定种子可复现
+- **模糊测试**（RFC 0001 §10）：自写 fuzzer、零依赖、固定种子可复现
   （`PCL_FUZZ_ITERS`/`PCL_FUZZ_SEED` 覆盖）——模板编译不崩溃/确定性，
   JSONC 剥离不崩溃/合法 JSON 不变/字符串免疫
 
@@ -90,7 +90,7 @@ v0.1 里程碑 M0–M4 全量交付（DSL/DESIGN 终审冻结版的首个实现�
   `:load` 惰性落盘预检 R430）
 - `pcl-connector/index.ts`：`/pcl` 命令、`pcl_write`/`pcl_read` 工具、
   `before_agent_start` 协议注入
-- DSL §12 示例对真 LLM 全链路跑通；实测修正记入 DESIGN §16
+- RFC 0000 §13 示例对真 LLM 全链路跑通；实测修正记入 RFC 0002
 
 ### 嵌入模式（M3/M4）
 
@@ -104,5 +104,5 @@ v0.1 里程碑 M0–M4 全量交付（DSL/DESIGN 终审冻结版的首个实现�
 - PyPI 分发名 `pclang`（import/命令名 `pcl`）、零运行时依赖、
   pcl/pclang 双入口、连接器拆包分发
 
-[0.2.0.dev0]: https://example.com/pcl/compare/v0.1.0.dev0...v0.2.0.dev0
-[0.1.0.dev0]: https://example.com/pcl/releases/tag/v0.1.0.dev0
+[Unreleased]: https://github.com/OrbitZore/pcl/compare/HEAD
+[0.2.0.dev0]: https://github.com/OrbitZore/pcl/releases/tag/v0.2.0.dev0

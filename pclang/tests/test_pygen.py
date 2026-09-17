@@ -12,7 +12,7 @@ GOLDEN = Path(__file__).resolve().parent / "golden"
 DATA = Path(__file__).resolve().parent / "data"
 
 
-# ---- 黄金快照（M0 验收：DSL §3 生成源与文档一致） ---------------------------
+# ---- 黄金快照（M0 验收：RFC 0000 §3 生成源与规范一致） ---------------------------
 
 @pytest.mark.parametrize("name", ["demo", "rewrite"])
 def test_golden(name):

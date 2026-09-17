@@ -1,4 +1,4 @@
-"""pygen — 发射器：AST → Python 源 + genLine→tplLine 映射（DESIGN §5.2）。
+"""pygen — 发射器：AST → Python 源 + genLine→tplLine 映射（RFC 0001 §5.2）。
 
 发射模型（append + emit）：
 - 文本常量按源序追加进单条合并段；
@@ -9,7 +9,7 @@
 - 指令构造（块边界、pass 冻结与开闭/提交序列、reply 发射）与 EOF 均为冲刷点
   （冲刷先于该构造生成的任何代码，含 :if/:while/:for 的条件/迭代式求值）。
 
-模块布局（DSL §9.2）：加载层（:function + 可提升顶层插值）+ ``main(__pcl_prompt="")``
+模块布局（RFC 0000 §9.2）：加载层（:function + 可提升顶层插值）+ ``main(__pcl_prompt="")``
 （prompt 序言 + global 并集 + 模板体，源序不变）。
 """
 
@@ -205,7 +205,7 @@ class _Emitter:
         if not text:
             return
         # 不预合并：逐项保留各自模板行，flush 时再合并相邻常量
-        # （合并段尾注行区间需覆盖首尾项，DESIGN §5.2）
+        # （合并段尾注行区间需覆盖首尾项，RFC 0001 §5.2）
         self.pending.append(("c", text, tpl_line))
 
     def append_ref(self, name: str, tpl_line: int):

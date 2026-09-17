@@ -1,8 +1,8 @@
 # pcl-connector-pi
 
-[PCL](../../../README.md) 的 **pi** 连接器（agent 后端适配子包）：在 pi 会话内提供
+[PCL](../../README.md) 的 **pi** 连接器（agent 后端适配子包）：在 pi 会话内提供
 `/pcl` 命令族与 `pcl_write`/`pcl_read` 工具，承载 pass 信令、嵌入运行与上下文接续。
-正向形态（`pcl run --agent pi` 拉起 `pi --mode rpc`）与本包一体——同一扩展、两种端点（DESIGN §8/A13）。
+正向形态（`pcl run --agent pi` 拉起 `pi --mode rpc`）与本包一体——同一扩展、两种端点（RFC 0002 §1/§5）。
 
 ## 安装
 
@@ -41,5 +41,5 @@ pi update --extensions                # 更新全部包（git ref 复核）
 ## 兼容性
 
 pi ≥ 0.85（依赖 `SessionManager.open/getCwd`、`session_shutdown.reason`、
-`ReplacedSessionContext`；契约见 [RFC 0002 §7](../../../rfc/rfc-0002-connector.zh.md)）。
+`ReplacedSessionContext`；契约见 [RFC 0002 §7](../../rfc/rfc-0002-connector.zh.md)）。
 协议版本随主包 `/pcl version` 握手（R16）。

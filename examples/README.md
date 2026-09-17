@@ -55,5 +55,5 @@ pcl gen review-prove.pcl
 
 - **stdout = 输出文档**（文本/插值/每轮回复，轮末才落）；**stderr = 诊断**（错误、
   `--trace` 实时进度）；退出码 0/1/2/3/130（成功/用法与编译/运行期/桥接/中断）；
-- 跨运行续聊：把 `:save` 得到的 token 存进文件，下次 `${cx = open(...).read().strip()}` + `${:load cx}`（DSL §8 配方）；
+- 跨运行续聊：把 `:save` 得到的 token 存进文件，下次 `${cx = open(...).read().strip()}` + `${:load cx}`（RFC 0000 §8 配方）；
 - 全部示例经 `tests/test_examples.py` 编译守护（`pcl check` 等价）。

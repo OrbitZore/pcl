@@ -1,4 +1,4 @@
-"""pibridge — PiBridge：pi 子进程 + JSONL RPC 客户端 + 上下文管理（DESIGN §8）。
+"""pibridge — PiBridge：pi 子进程 + JSONL RPC 客户端 + 上下文管理（RFC 0001 §8）。
 
 两种传输形态、单一协议（A13）：
 - 正向（默认）：``pi --mode rpc [--name pcl-…] [-e <connector>]`` 子进程；
@@ -381,7 +381,7 @@ class PiBridge(IAgentBridge):
                     if not resp.get("success"):
                         raise PclError(
                             "A501", f"pass 提交失败：{resp.get('error')}")
-                    # response ok 仅作屏障（§8.2/DESIGN §16）：settled 才是边界
+                    # response ok 仅作屏障（§8.2/RFC 0001 §16）：settled 才是边界
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     break

@@ -1,7 +1,7 @@
 """settings — 设置文件（用户级/项目级）的发现、解析、合并与校验（docs/SETTINGS.md）。
 
 - **只服务 CLI 层**：库形态（run_program/compile_program/importer）不读设置，
-  调用方显式传参（DESIGN §6/A12 隔离不变式）；
+  调用方显式传参（RFC 0001 §6/A12 隔离不变式）；
 - 发现：用户级 ``$PCL_CONFIG_FILE``（重定向；缺失即报错）或缺省
   ``$XDG_CONFIG_HOME/pcl/settings.json``（缺失跳过）；项目级自入口 ``.pcl``
   向上取**最近一个** ``.pcl/settings.json``（``PCL_NO_PROJECT_CONFIG`` 或
