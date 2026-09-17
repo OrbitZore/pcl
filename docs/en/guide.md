@@ -141,11 +141,40 @@ When the body contains a literal delimiter, use the extended form:
 
 ## Two pi integrations
 
-- **Forward**: `pcl run --agent pi file.pcl` — PCL spawns a headless
-  `pi --mode rpc` in its own session
-- **Embedded**: `/pcl run file.pcl` inside a pi session — passes go
-  straight into **your current session**; `:new`/`:load` inside the
-  script switch the session you're looking at (with takeover-rule
-  guards)
-- Executable pcl scripts under `~/.pcl/bin/` auto-register as
-  `/pcl-<name>` commands (also embedded)
+**Forward (terminal)** — `pcl run --agent pi file.pcl`: PCL spawns a
+headless `pi --mode rpc` in its own session, runs to completion,
+exits. Good for scripting / CI / one-shot tasks.
+
+**Embedded (inside a pi session)** — in the pi conversation you're
+already using:
+
+```text
+/pcl run /path/to/goal.pcl "task description"
+```
+
+- Passes go straight into **your current session** — the agent sees
+  your conversation context
+- Output goes to a temp file; `$(# … #)` notes appear as session
+  entries that scroll with the chat (never entering LLM context)
+- `:new`/`:load` inside the script switch the session you're looking
+  at (guarded by takeover rules, see
+  [RFC 0002 §7](https://github.com/OrbitZore/pcl/blob/main/rfc/rfc-0002-connector.md))
+- Other subcommands: `/pcl gen|check|config|version` mirror the CLI
+
+**`~/.pcl/bin/` quick commands** — drop executable `.pcl` scripts
+into that directory; the connector scans recursively and registers
+them as slash commands: paths flatten into command names
+(`tools/review` → `/pcl-tools-review`), **always embedded in the
+current session** (never spawned):
+
+```bash
+mkdir -p ~/.pcl/bin
+cp examples/goal-loop.pcl ~/.pcl/bin/goal.pcl
+chmod +x ~/.pcl/bin/goal.pcl
+# restart pi, then:
+/pcl-goal "Create hello.txt with content Hello PCL"
+```
+
+> Scripts in `~/.pcl/bin/` execute inside your session — only place
+> templates from sources you trust (equivalent to handing an arbitrary
+> prompt to the agent; see SECURITY.md).

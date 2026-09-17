@@ -104,6 +104,25 @@ pcl gen examples/hello.pcl
 
 更多示例见 [examples/](examples/)。
 
+### 在 pi 会话内使用（嵌入形态）
+
+装好连接器后，模板可以直接在你的 pi 对话里运行——pass 进入
+**你当前的会话**：
+
+```text
+/pcl run ./examples/goal-loop.pcl "在当前目录创建 hello.txt，内容为 Hello PCL"
+```
+
+把可执行 `.pcl` 脚本放进 `~/.pcl/bin/`——自动注册为 pi 斜杠命令
+（路径展平、一律嵌入运行）：
+
+```bash
+mkdir -p ~/.pcl/bin && cp examples/goal-loop.pcl ~/.pcl/bin/
+chmod +x ~/.pcl/bin/goal-loop.pcl
+# 重启 pi 后：
+/pcl-goal-loop "在当前目录创建 hello.txt，内容为 Hello PCL"
+```
+
 ## 文档
 
 | 页面 | 说明 |

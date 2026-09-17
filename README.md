@@ -106,6 +106,25 @@ pcl gen examples/hello.pcl
 
 More examples in [examples/](examples/).
 
+### Inside a pi session (embedded)
+
+With the connector installed, run templates directly in your pi
+conversation — passes enter your **current session**:
+
+```text
+/pcl run ./examples/goal-loop.pcl "Create hello.txt with content Hello PCL"
+```
+
+Drop executable `.pcl` scripts into `~/.pcl/bin/` — they become pi
+slash commands automatically (path flattened, always embedded):
+
+```bash
+mkdir -p ~/.pcl/bin && cp examples/goal-loop.pcl ~/.pcl/bin/
+chmod +x ~/.pcl/bin/goal-loop.pcl
+# restart pi, then:
+/pcl-goal-loop "Create hello.txt with content Hello PCL"
+```
+
 ## Documentation
 
 | Page | Description |

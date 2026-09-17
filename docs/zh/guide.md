@@ -124,9 +124,32 @@ ${:done}
 
 ## 与 pi 的两种集成
 
-- **正向**：`pcl run --agent pi file.pcl`——PCL 拉起 headless 的
-  `pi --mode rpc`，独立会话
-- **嵌入**：pi 会话内 `/pcl run file.pcl`——pass 直接进**你当前的会话**；
-  脚本里的 `:new`/`:load` 会切换你眼前的会话（有接管规则保护）
-- `~/.pcl/bin/` 下的可执行 pcl 脚本自动注册为 `/pcl-<名字>` 命令
-  （同样嵌入当前会话）
+**正向（终端）**——`pcl run --agent pi file.pcl`：PCL 拉起 headless 的
+`pi --mode rpc`，用独立会话跑完即退。适合脚本化/CI/一次性任务。
+
+**嵌入（pi 会话内）**——在你正在用的 pi 对话里：
+
+```text
+/pcl run /path/to/goal.pcl "任务描述"
+```
+
+- pass 直接进**你当前的会话**——agent 看得到你们的对话上下文
+- 输出写临时文件、注记 `$(# … #)` 以会话条目形式随对话滚动（不进 LLM 上下文）
+- 脚本里的 `:new`/`:load` 会切换你眼前的会话（有接管规则保护，见
+  [RFC 0002 §7](https://github.com/OrbitZore/pcl/blob/main/rfc/rfc-0002-connector.zh.md)）
+- 其余子命令：`/pcl gen|check|config|version` 与 CLI 同义
+
+**`~/.pcl/bin/` 快捷命令**——把可执行 `.pcl` 脚本放进该目录，连接器
+递归扫描并自动注册为斜杠命令：路径展平为命令名（`tools/review` →
+`/pcl-tools-review`），**一律嵌入当前会话运行**（从不另起进程）：
+
+```bash
+mkdir -p ~/.pcl/bin
+cp examples/goal-loop.pcl ~/.pcl/bin/goal.pcl
+chmod +x ~/.pcl/bin/goal.pcl
+# 重启 pi 后：
+/pcl-goal "在当前目录创建 hello.txt，内容为 Hello PCL"
+```
+
+> `~/.pcl/bin/` 里的脚本会在你的会话内执行——只放你信任来源的模板
+> （等同把任意 prompt 交给 agent；见 SECURITY.md）。

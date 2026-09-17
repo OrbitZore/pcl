@@ -85,6 +85,24 @@ chmod +x score2.pcl
 ./score2.pcl "为什么草是绿的"
 ```
 
+## 在 pi 会话内运行
+
+装好连接器（`pi install npm:pcl-connector-pi`）后，不用离开对话：
+
+```text
+/pcl run ./score.pcl "Why is the sky blue"
+```
+
+**`~/.pcl/bin/` 快捷命令**——放进去的可执行 `.pcl` 自动变成斜杠命令：
+
+```bash
+mkdir -p ~/.pcl/bin && cp score.pcl ~/.pcl/bin/
+chmod +x ~/.pcl/bin/score.pcl
+# 重启 pi 后：/pcl-score "Why is the sky blue"
+```
+
+详见[核心指南 · 与 pi 的两种集成](guide.md#与-pi-的两种集成)。
+
 ## 下一步
 
 - [核心指南](guide.md)——pass 生命周期、`:new`/`:save`/`:load`、

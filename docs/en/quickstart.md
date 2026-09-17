@@ -89,6 +89,26 @@ chmod +x score2.pcl
 ./score2.pcl "Why is grass green"
 ```
 
+## Running inside a pi session
+
+With the connector installed (`pi install npm:pcl-connector-pi`), you
+never leave the conversation:
+
+```text
+/pcl run ./score.pcl "Why is the sky blue"
+```
+
+**`~/.pcl/bin/` quick commands** — executable `.pcl` files dropped
+there become slash commands automatically:
+
+```bash
+mkdir -p ~/.pcl/bin && cp score.pcl ~/.pcl/bin/
+chmod +x ~/.pcl/bin/score.pcl
+# after restarting pi: /pcl-score "Why is the sky blue"
+```
+
+See [Guide · two pi integrations](guide.md#two-pi-integrations).
+
 ## Next
 
 - [Guide](guide.md) — pass lifecycle, `:new`/`:save`/`:load`, the goal
