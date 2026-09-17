@@ -38,7 +38,7 @@ pip install pclang
 For the pi connector:
 
 ```bash
-pi install git:github.com/USER/pcl --directory pcl-connector/pi
+pi install git:github.com/OrbitZore/pcl --directory pcl-connector/pi
 ```
 
 ## Next Steps

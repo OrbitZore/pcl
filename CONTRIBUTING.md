@@ -5,7 +5,7 @@ Thanks for your interest in contributing! This document covers the basics.
 ## Getting Started
 
 ```bash
-git clone https://github.com/USER/pcl.git
+git clone https://github.com/OrbitZore/pcl.git
 cd pcl/pclang
 uv venv && uv pip install -e ".[dev]"
 python -m pytest -m "not smoke_pi"    # should all pass

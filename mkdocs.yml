@@ -1,8 +1,8 @@
 site_name: PCL — Prompt Control Language
 site_description: A template DSL for orchestrating LLM agents — template layer is PCL, script layer is real Python.
-site_url: https://USER.github.io/pcl/
-repo_url: https://github.com/USER/pcl
-repo_name: USER/pcl
+site_url: https://OrbitZore.github.io/pcl/
+repo_url: https://github.com/OrbitZore/pcl
+repo_name: OrbitZore/pcl
 edit_uri: edit/main/docs/
 
 theme:

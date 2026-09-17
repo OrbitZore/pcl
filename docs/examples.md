@@ -1,6 +1,6 @@
 # Examples
 
-All examples are in the [`examples/`](https://github.com/USER/pcl/tree/main/examples) directory and are executable (shebang + `chmod +x`).
+All examples are in the [`examples/`](https://github.com/OrbitZore/pcl/tree/main/examples) directory and are executable (shebang + `chmod +x`).
 
 ## review-prove — Review loop until all claims are verified
 

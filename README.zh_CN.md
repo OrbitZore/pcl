@@ -4,7 +4,7 @@
 
 编排 LLM/agent 的模板 DSL：**模板层是 PCL，脚本层是真 Python**。
 
-[![CI](https://github.com/USER/pcl/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/pcl/actions/workflows/ci.yml)
+[![CI](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml/badge.svg)](https://github.com/OrbitZore/pcl/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/pclang.svg)](https://pypi.org/project/pclang/)
 [![Python](https://img.shields.io/pypi/pyversions/pclang.svg)](https://pypi.org/project/pclang/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -73,7 +73,7 @@ pip install pclang        # 或：pipx install pclang / uvx pclang
 安装 pi 连接器（正向 `--agent pi` 与嵌入 `/pcl` 命令族）：
 
 ```bash
-pi install git:github.com/USER/pcl --directory pcl-connector/pi
+pi install git:github.com/OrbitZore/pcl --directory pcl-connector/pi
 # PyPI 发布后：pi install npm:pcl-connector-pi
 ```
 
@@ -119,7 +119,7 @@ pcl gen examples/demo.pcl
 ## 开发
 
 ```bash
-git clone https://github.com/USER/pcl.git
+git clone https://github.com/OrbitZore/pcl.git
 cd pcl/pclang
 uv venv && uv pip install -e ".[dev]"
 python -m pytest                    # 单元 + e2e 测试

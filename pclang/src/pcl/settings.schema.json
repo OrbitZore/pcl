@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/earendil-works/pcl/main/pclang/src/pcl/settings.schema.json",
+  "$id": "https://raw.githubusercontent.com/OrbitZore/pcl/main/pclang/src/pcl/settings.schema.json",
   "title": "pcl settings",
   "description": "PCL 设置文件（用户级 / 项目级）。格式为 JSONC 子集（允许 // 与 /* */ 注释、尾随逗号）。注意：pi.* 与 script.path 仅允许出现在用户级文件——项目级出现会被拒绝（信任模型，docs/SETTINGS.md §3.5）。",
   "type": "object",

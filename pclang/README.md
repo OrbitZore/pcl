@@ -3,7 +3,7 @@
 编排 LLM/agent 的模板 DSL：**模板层是 PCL，脚本层是真 Python**。
 
 - 纯 Python 包（≥3.10，运行时零第三方依赖），把 `.pcl` 编译成可读 Python 源并在同一解释器执行，完整复用 Python 生态；
-- 首个适配的外部 agent 为 [pi](https://github.com/earendil-works/pi-coding-agent)：正向 `pcl run` 拉起 `pi --mode rpc` 经 stdio JSONL 驱动 [pcl-connector](https://github.com/earendil-works/pcl) 完成pass 交互与上下文管理；反向亦通——pi 会话内 `/pcl run` 直接执行（嵌入模式）。
+- 首个适配的外部 agent 为 [pi](https://github.com/earendil-works/pi-coding-agent)：正向 `pcl run` 拉起 `pi --mode rpc` 经 stdio JSONL 驱动 [pcl-connector](https://github.com/OrbitZore/pcl) 完成pass 交互与上下文管理；反向亦通——pi 会话内 `/pcl run` 直接执行（嵌入模式）。
 
 ## 安装
 
