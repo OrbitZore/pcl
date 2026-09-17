@@ -1,6 +1,6 @@
 # PCL 示例集
 
-English | [简体中文](README.zh-CN.md)
+[English](README.md) | **简体中文**
 
 按场景组织的可运行用例。运行方式：`pcl run <文件.pcl> "<prompt>"`（默认
 `--agent pi`，需已配置模型；连接器安装见主 [README](../README.zh-CN.md)）。

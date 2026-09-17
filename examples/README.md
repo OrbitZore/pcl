@@ -1,6 +1,6 @@
 # PCL Examples
 
-[English](README.md) | 简体中文
+**English** | [简体中文](README.zh-CN.md)
 
 Runnable examples organized by scenario. Run with
 `pcl run <file.pcl> "<prompt>"` (default `--agent pi`, model required;
