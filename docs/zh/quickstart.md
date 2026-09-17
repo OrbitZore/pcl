@@ -5,7 +5,7 @@
 ## 安装
 
 ```bash
-pip install pclang        # 或：pipx install pclang / uvx pclang
+pip install pclang        # PEP 668 环境（Arch/conda…）：uv tool install pclang / pipx install pclang
 ```
 
 要求 Python ≥ 3.10。`pclang` 是分发名，命令与 import 名都是 `pcl`。

@@ -6,7 +6,7 @@ a variable.
 ## Install
 
 ```bash
-pip install pclang        # or: pipx install pclang / uvx pclang
+pip install pclang        # PEP 668 systems (Arch/conda…): uv tool install pclang / pipx install pclang
 ```
 
 Python ≥ 3.10. `pclang` is the distribution name; the command and

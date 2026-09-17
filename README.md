@@ -76,7 +76,7 @@ Pre-1.0, starting from alpha (`0.2.0a1` — see the
 ## Install
 
 ```bash
-pip install pclang        # or: pipx install pclang / uvx pclang
+pip install pclang        # PEP 668 systems (Arch/conda…): uv tool install pclang / pipx install pclang
 ```
 
 Requires Python ≥ 3.10. Zero runtime dependencies.
