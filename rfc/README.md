@@ -20,6 +20,7 @@ documentation lives in [`docs/`](../docs/).
 | [0000](rfc-0000-language.md) | Language Definition | Lexical structure, interpolation, directives, pass semantics, error codes |
 | [0001](rfc-0001-runtime.md) | Runtime Definition | Compiler pipeline, module layout, bridge abstraction, settings, CLI |
 | [0002](rfc-0002-connector.md) | Connector Definition | `/pcl` command family, tools, RPC proxy, session takeover, runtime interface |
+| [0003](rfc-0003-versioning.md) | Versioning Plan (Process) | Release sequence (alpha-first), stability tiers, release checklist |
 
 ## Languages
 

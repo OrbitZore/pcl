@@ -50,7 +50,8 @@ pcl/
 
 ## Versioning Plan（版本号计划）
 
-遵循 [语义化版本](https://semver.org/) + PEP 440；**从 alpha 开始**：
+完整计划见 [RFC 0003](rfc/rfc-0003-versioning.zh.md)。摘要——遵循
+[语义化版本](https://semver.org/) + PEP 440；**从 alpha 开始**：
 
 | 阶段 | 版本序列 | 含义 |
 |---|---|---|

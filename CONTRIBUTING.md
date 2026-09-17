@@ -52,7 +52,7 @@ pcl/
 
 ## Versioning Plan
 
-SemVer + PEP 440; **starting from alpha**:
+Full plan: [RFC 0003](rfc/rfc-0003-versioning.md). Summary — SemVer + PEP 440; **starting from alpha**:
 
 | Stage | Sequence | Meaning |
 |---|---|---|
