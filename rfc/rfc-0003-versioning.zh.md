@@ -29,7 +29,9 @@ Language: 中文（权威稿；英文镜像见同名 .md）
 - **PEP 440** 格式 + **semver** 语义；tag 用 `v` 前缀（`v0.2.0a1`）
 - 版本**单源**：`pclang/src/pcl/_version.py`（pyproject 经 dynamic 读取；
   `pcl-connector/pi/package.json` 由 CI consistency job 守护一致）
-- PyPI（`pclang`）与 npm（`pcl-connector-pi`）**同版本号同步发布**
+- PyPI（`pclang`）与 npm（`pcl-connector-pi`）**语义同版本同步发布**；
+  预发布分隔符按各自生态惯例：PEP 440 `0.2.0a1` ↔ npm semver `0.2.0-a1`
+  （CI consistency 按规范化比较）
 
 ### 2. 发布序列
 

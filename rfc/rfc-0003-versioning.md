@@ -37,7 +37,9 @@ going stable too early turns every bugfix into a breaking change.
   reads it dynamically; `pcl-connector/pi/package.json` is guarded
   consistent by the CI consistency job)
 - PyPI (`pclang`) and npm (`pcl-connector-pi`) **publish the same
-  version number in lockstep**
+  semantic version in lockstep**; pre-release separators follow each
+  ecosystem's convention: PEP 440 `0.2.0a1` ↔ npm semver `0.2.0-a1`
+  (CI consistency compares normalized)
 
 ### 2. Release sequence
 

@@ -1,4 +1,4 @@
-# 由 pcl 0.2.0.dev0 生成，源：demo.pcl。请勿手工编辑。
+# 由 pcl 0.2.0a1 生成，源：demo.pcl。请勿手工编辑。
 from pcl.runtime import emit, text, submit, push_sink, pop_sink
 
 SCORE = 0  # pcl:2

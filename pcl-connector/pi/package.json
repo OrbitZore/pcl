@@ -1,6 +1,6 @@
 {
   "name": "pcl-connector-pi",
-  "version": "0.2.0.dev0",
+  "version": "0.2.0-a1",
   "description": "pi connector for PCL (Prompt Control Language) — /pcl 命令族：会话内执行 PCL 模板、pass 交互、pcl_write/pcl_read 工具与嵌入上下文接续",
   "keywords": [
     "pi-package",

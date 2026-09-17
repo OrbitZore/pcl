@@ -6,6 +6,10 @@
 
 ## [Unreleased]
 
+（下一个版本）
+
+## [0.2.0a1] - 2026-09-17
+
 ### 变更（破坏性）
 
 - **移除 `$prompt` 裸糖**（[rfc-0000-r1](rfc/rfc-0000-r1-remove-bare-sugar.zh.md)）：
@@ -111,5 +115,6 @@ v0.1 里程碑 M0–M4 全量交付（DSL/DESIGN 终审冻结版的首个实现�
 - PyPI 分发名 `pclang`（import/命令名 `pcl`）、零运行时依赖、
   pcl/pclang 双入口、连接器拆包分发
 
-[Unreleased]: https://github.com/OrbitZore/pcl/compare/HEAD
+[Unreleased]: https://github.com/OrbitZore/pcl/compare/v0.2.0a1...HEAD
+[0.2.0a1]: https://github.com/OrbitZore/pcl/releases/tag/v0.2.0a1
 [0.2.0.dev0]: https://github.com/OrbitZore/pcl/releases/tag/v0.2.0.dev0
