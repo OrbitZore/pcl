@@ -1,7 +1,7 @@
 #!/usr/bin/env pcl
-${:# /goal-style goal-achievement loop: two passes per round (act + check), break when done}
-${:# Each pass runs in a fresh context (:new) — so every prompt is self-contained:}
-${:# goal + accumulated action history + round number}
+${:# /goal 式目标达成循环：每轮两 pass（执行+检查），达成即 break}
+${:# 每个 pass 开新上下文（:new），因此 prompt 必须自包含：}
+${:# 目标 + 累积行动历史 + 轮次}
 ${ROUND = 0}
 ${DONE = False}
 ${W = ""}
@@ -11,7 +11,7 @@ ${MAX = 100}
 ${:while ROUND < MAX}
     ${ROUND = ROUND + 1}
 
-    ${:# Pass 1: act — fresh context, self-contained prompt}
+    ${:# Pass 1：执行——新上下文，自包含 prompt}
     ${:new}
     ${:pass :write W}
     Executor (round $(ROUND)/$(MAX)). You run in a fresh context — everything you need is below.
@@ -21,10 +21,10 @@ ${:while ROUND < MAX}
     Take the next action toward the goal, then call pcl_write exactly once with:
     {"W": "one-line action summary"}
 
-    ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
-
-    ${:# Pass 2: check — fresh context, self-contained prompt}
+    ${:# Pass 2：检查——新上下文，自包含 prompt}
     ${:new}
+    ${:# :new 之后 = Pass 1 pass 体外的指令边界——W 已是 Pass 1 写回的行动摘要}
+    ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
     ${:pass :write W}
     Inspector (round $(ROUND)/$(MAX)). You run in a fresh context — judge from the evidence below.
     Task goal: $prompt
@@ -33,7 +33,7 @@ ${:while ROUND < MAX}
     Has the goal been achieved? Call pcl_write exactly once with:
     {"W": {"done": true/false, "note": "one-line verdict"}}
 
-    ${:# the :if condition evaluates after writeback — W is Pass 2's result}
+    ${:# 注：:if 条件在写回之后求值——W 即 Pass 2 的结果}
     ${:if isinstance(W, dict) and W.get("done")}
         ${DONE = True}
         ${:break}

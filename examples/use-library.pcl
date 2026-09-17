@@ -1,6 +1,6 @@
 #!/usr/bin/env pcl
 ${:# 场景：库复用——.pcl 间 import（与 Python 互操作同机制）}
 ${import greetlib}
-调用共享库函数：
-${_ = greetlib.greet("世界")}
-（上面一行由 greetlib.pcl 的模板函数渲染）
+Calling the shared library function:
+${_ = greetlib.greet("PCL")}
+(the line above is rendered by a template function from greetlib.pcl)

@@ -38,9 +38,8 @@ ${:while ROUND < MAX}
     Take the next action, then call pcl_write exactly once with:
     {"W": "one-line action summary"}
 
-    ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
-
     ${:new}
+    ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
     ${:pass :write W}
     Inspector (round $(ROUND)/$(MAX)). Fresh context — judge from the evidence below.
     Task goal: $prompt

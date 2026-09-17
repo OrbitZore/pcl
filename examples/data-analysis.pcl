@@ -5,5 +5,6 @@ ${:# 场景：结构化数据经 :read 下发——agent 按需 pcl_read 拉取�
 ${DATA = [round(60 + 40 * ((i * 37) % 100) / 100, 1) for i in range(24)]}
 
 ${:pass :read DATA}
-数据集 DATA（24 个 0–100 制数值）已就绪：请调用 pcl_read 工具按名读取，
-然后用不超过三句话概括其分布特征（范围/中位数/是否均匀），不要罗列全部数字。
+Dataset DATA (24 scores on a 0-100 scale) is ready: call the pcl_read
+tool to fetch it by name, then summarize its distribution (range /
+median / uniformity) in at most three sentences. Do not list the numbers.

@@ -38,9 +38,8 @@ ${:while ROUND < MAX}
     采取下一步行动，然后只调用一次 pcl_write 写入：
     {"W": "行动摘要"}
 
-    ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
-
     ${:new}
+    ${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}
     ${:pass :write W}
     检查者（第 $(ROUND)/$(MAX) 轮）。新上下文——依以下证据判断。
     任务目标：$prompt

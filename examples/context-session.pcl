@@ -1,14 +1,14 @@
 #!/usr/bin/env pcl
 ${:# 场景：上下文三指令——save → new → load 往返（会话记忆演示）}
 ${:pass}
-第一轮（原会话）：请只回复一句话，内容为“原会话已记住暗号：蒲公英”。
+Round 1 (original session): reply with exactly one sentence saying the original session memorized the codeword: dandelion.
 ${:save cx}
 
 ${:new}
 
 ${:pass}
-第二轮（新匿名会话，与原会话互不可见）：请只回复“新会话已就绪”。
+Round 2 (fresh anonymous session, invisible to the original): reply with exactly "new session ready".
 ${:load cx}
 
 ${:pass}
-第三轮（已切回原会话）：上一轮我请你记住的暗号是什么？只回复暗号本身。
+Round 3 (switched back to the original session): what codeword did I ask you to memorize earlier? Reply with the codeword only.

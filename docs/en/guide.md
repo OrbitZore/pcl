@@ -68,8 +68,8 @@ after the commit, so post-processing must sit after a directive:
 ${:pass :write W}
 Executor: … write {"W": "action summary"}
 
-${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}  ← after :new, outside the pass body
 ${:new}
+${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}  ← after :new = past the directive boundary; W is Pass 1's write-back
 ${:pass :write W}
 Inspector: actions so far: $(HISTORY)… write {"W": {"done": true/false}}
 ${:if isinstance(W, dict) and W.get("done")}    ← :if condition evaluates after writeback
@@ -78,7 +78,9 @@ ${:fi}
 ```
 
 Two correct places to read a written value: **pure statements after
-the next directive** (e.g. after `${:new}`), or **a directive's
+the next directive** (e.g. between Pass 2's `${:new}` and `${:pass}`
+— placing them inside the previous pass body is a common error and
+reads the stale pre-commit value), or **a directive's
 condition expression** (evaluated post-writeback).
 
 ## Context management: :new / :save / :load

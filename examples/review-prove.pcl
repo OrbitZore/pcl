@@ -1,8 +1,8 @@
 #!/usr/bin/env pcl
 ${import json}
 
-${:# Review-and-prove loop: refine claims until all credible (or round limit)}
-${:# Final verdict goes out via $(# … #) note output — never enters LLM context}
+${:# 审查自证循环：逐轮审查观点直到全部可信（或达轮次上限）}
+${:# 终态结论经 $(# … #) 注记输出——不进 LLM 上下文}
 ${ROUND = 0}
 ${BRAINSTORM = []}
 ${PENDING = []}
@@ -36,7 +36,7 @@ ${:while ROUND < MAX_ROUNDS}
 
     $((json.dumps(PENDING, ensure_ascii=False) + "\n") if PENDING else "")
     Current round: $(ROUND)
-    ${:# :if condition evaluates after writeback — RESULT is this round's result}
+    ${:# 注：:if 条件在写回之后求值——RESULT 即本轮结果}
     ${:if isinstance(RESULT, dict) and not (RESULT.get("pending") or [])}
         ${:break}
     ${:fi}

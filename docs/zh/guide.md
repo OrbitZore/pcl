@@ -58,8 +58,8 @@ pass 体结束于**下一个指令**。写回值只在提交后存在，所以�
 ${:pass :write W}
 执行者：…… 写入 {"W": "行动摘要"}
 
-${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}   ← 在 :new 之后，pass 体外
 ${:new}
+${HISTORY = HISTORY + (W if isinstance(W, str) else str(W)) + "\n"}   ← :new 之后 = 指令边界外，W 已是 Pass 1 写回值
 ${:pass :write W}
 检查者：已有行动：$(HISTORY)…… 写入 {"W": {"done": true/false}}
 ${:if isinstance(W, dict) and W.get("done")}    ← :if 条件在写回之后求值
@@ -67,7 +67,7 @@ ${:if isinstance(W, dict) and W.get("done")}    ← :if 条件在写回之后求
 ${:fi}
 ```
 
-两种读写回值的正确位置：**下一个指令之后**（如 `${:new}` 后的纯语句），
+两种读写回值的正确位置：**下一个指令之后**的纯语句（如 Pass 2 的 `${:new}` 与 `${:pass}` 之间——夹在前一 pass 体与指令之间是常见错误，读到的是提交前的旧值），
 或 **`:if` 等指令的条件表达式**（在写回后求值）。
 
 ## 上下文管理：:new / :save / :load
