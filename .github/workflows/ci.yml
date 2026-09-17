@@ -42,10 +42,10 @@ jobs:
       - name: 构建
         run: python -m pip install build && python -m build
         working-directory: pclang
-      - name: 干净环境安装冒烟
+      - name: 干净环境安装冒烟（working-directory=pclang，路径相对之）
         run: |
           python -m venv /tmp/fresh
-          /tmp/fresh/bin/python -m pip install pclang/dist/*.whl
+          /tmp/fresh/bin/python -m pip install dist/*.whl
           /tmp/fresh/bin/pcl version
           /tmp/fresh/bin/pcl check tests/data/demo.pcl --cache none
         working-directory: pclang
